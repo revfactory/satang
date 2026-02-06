@@ -114,6 +114,7 @@ ALTER TABLE public.notes ENABLE ROW LEVEL SECURITY;
 
 -- Users
 CREATE POLICY users_select ON public.users FOR SELECT USING (auth.uid() = id);
+CREATE POLICY users_insert ON public.users FOR INSERT WITH CHECK (auth.uid() = id);
 CREATE POLICY users_update ON public.users FOR UPDATE USING (auth.uid() = id);
 
 -- Notebooks

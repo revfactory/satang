@@ -38,6 +38,24 @@ export function useCreateNotebook() {
       } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
+      // users 테이블에 프로필이 없으면 생성 (FK 제약 충족)
+      await supabase.from("users").upsert(
+        {
+          id: user.id,
+          email: user.email || "",
+          display_name:
+            user.user_metadata?.full_name ||
+            user.user_metadata?.name ||
+            user.email ||
+            "",
+          avatar_url:
+            user.user_metadata?.avatar_url ||
+            user.user_metadata?.picture ||
+            null,
+        },
+        { onConflict: "id" }
+      );
+
       const { data, error } = await supabase
         .from("notebooks")
         .insert({
