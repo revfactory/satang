@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Send, AlertTriangle, Copy, BookmarkPlus, ThumbsUp, ThumbsDown } from "lucide-react";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { useChatMessages, useSendMessage } from "@/hooks/use-chat";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -68,7 +67,7 @@ export function ChatPanel({ notebookId, notebookTitle }: ChatPanelProps) {
       </div>
 
       {/* Messages */}
-      <ScrollArea className="flex-1 px-4">
+      <div className="flex-1 min-h-0 overflow-y-auto px-4">
         {messages.length === 0 && !isStreaming ? (
           /* Initial State */
           <div className="py-8 max-w-2xl mx-auto">
@@ -169,7 +168,7 @@ export function ChatPanel({ notebookId, notebookTitle }: ChatPanelProps) {
             <div ref={messagesEndRef} />
           </div>
         )}
-      </ScrollArea>
+      </div>
 
       {/* Input */}
       <div className="p-4 border-t border-border-default">
