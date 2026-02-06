@@ -50,38 +50,38 @@ export function NotebookClient({ notebook, user }: NotebookClientProps) {
         onShare={handleShare}
       />
 
-      <ResizablePanelGroup orientation="horizontal" className="flex-1">
-        {/* Sources Panel */}
-        <ResizablePanel
-          defaultSize={20}
-          minSize={15}
-          maxSize={30}
-          collapsible
-          className="border-r border-border-default"
-        >
-          <SourcesPanel notebookId={notebook.id} />
-        </ResizablePanel>
+      <div className="flex-1 min-h-0 overflow-hidden">
+        <ResizablePanelGroup orientation="horizontal">
+          {/* Sources Panel */}
+          <ResizablePanel
+            defaultSize="20%"
+            minSize="15%"
+            maxSize="30%"
+            className="border-r border-border-default"
+          >
+            <SourcesPanel notebookId={notebook.id} />
+          </ResizablePanel>
 
-        <ResizableHandle className="w-px bg-border-default hover:bg-brand transition-colors data-[resize-handle-active]:bg-brand" />
+          <ResizableHandle withHandle />
 
-        {/* Chat Panel */}
-        <ResizablePanel defaultSize={50} minSize={30}>
-          <ChatPanel notebookId={notebook.id} notebookTitle={title} />
-        </ResizablePanel>
+          {/* Chat Panel */}
+          <ResizablePanel defaultSize="50%" minSize="30%">
+            <ChatPanel notebookId={notebook.id} notebookTitle={title} />
+          </ResizablePanel>
 
-        <ResizableHandle className="w-px bg-border-default hover:bg-brand transition-colors data-[resize-handle-active]:bg-brand" />
+          <ResizableHandle withHandle />
 
-        {/* Studio Panel */}
-        <ResizablePanel
-          defaultSize={30}
-          minSize={18}
-          maxSize={35}
-          collapsible
-          className="border-l border-border-default"
-        >
-          <StudioPanel notebookId={notebook.id} />
-        </ResizablePanel>
-      </ResizablePanelGroup>
+          {/* Studio Panel */}
+          <ResizablePanel
+            defaultSize="30%"
+            minSize="18%"
+            maxSize="35%"
+            className="border-l border-border-default"
+          >
+            <StudioPanel notebookId={notebook.id} />
+          </ResizablePanel>
+        </ResizablePanelGroup>
+      </div>
     </div>
   );
 }

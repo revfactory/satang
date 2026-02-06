@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Upload, Globe, FolderOpen, ClipboardPaste, FileUp, X, Loader2 } from "lucide-react";
 import { useAddTextSource } from "@/hooks/use-sources";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 interface SourceAddModalProps {
@@ -37,6 +38,7 @@ export function SourceAddModal({
   const [isUploading, setIsUploading] = useState(false);
 
   const addTextSource = useAddTextSource();
+  const queryClient = useQueryClient();
 
   const onDrop = useCallback(
     async (acceptedFiles: File[]) => {
@@ -66,6 +68,8 @@ export function SourceAddModal({
             toast.error(`${file.name}: 업로드 실패`);
           } else {
             toast.success(`${file.name}: 업로드 완료`);
+            queryClient.invalidateQueries({ queryKey: ["sources"] });
+            queryClient.invalidateQueries({ queryKey: ["notebooks"] });
           }
         }
         onClose();
@@ -107,6 +111,8 @@ export function SourceAddModal({
         toast.error("URL 소스 추가 실패");
       } else {
         toast.success("URL 소스가 추가되었습니다.");
+        queryClient.invalidateQueries({ queryKey: ["sources"] });
+        queryClient.invalidateQueries({ queryKey: ["notebooks"] });
         setUrlInput("");
         setMode("main");
         onClose();

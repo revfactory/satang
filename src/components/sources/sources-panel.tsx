@@ -6,6 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useSources, useToggleSource, useToggleAllSources, useDeleteSource } from "@/hooks/use-sources";
 import { SourceAddModal } from "./source-add-modal";
+import { SourceDetailModal } from "./source-detail-modal";
 import type { Source, SourceType } from "@/lib/supabase/types";
 
 const SOURCE_ICONS: Record<SourceType, React.ReactNode> = {
@@ -40,6 +41,7 @@ interface SourcesPanelProps {
 
 export function SourcesPanel({ notebookId }: SourcesPanelProps) {
   const [showAddModal, setShowAddModal] = useState(false);
+  const [selectedSource, setSelectedSource] = useState<Source | null>(null);
   const { data: sources = [], isLoading } = useSources(notebookId);
   const toggleSource = useToggleSource();
   const toggleAll = useToggleAllSources();
@@ -99,7 +101,8 @@ export function SourcesPanel({ notebookId }: SourcesPanelProps) {
             {sources.map((source) => (
               <div
                 key={source.id}
-                className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-gray-50 group"
+                className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-gray-50 group cursor-pointer"
+                onClick={() => setSelectedSource(source)}
               >
                 {source.processing_status === "completed" ? (
                   SOURCE_ICONS[source.type]
@@ -117,6 +120,7 @@ export function SourcesPanel({ notebookId }: SourcesPanelProps) {
                       is_enabled: !!checked,
                     })
                   }
+                  onClick={(e) => e.stopPropagation()}
                 />
               </div>
             ))}
@@ -130,6 +134,12 @@ export function SourcesPanel({ notebookId }: SourcesPanelProps) {
         onClose={() => setShowAddModal(false)}
         notebookId={notebookId}
         sourceCount={sources.length}
+      />
+
+      {/* Source Detail Modal */}
+      <SourceDetailModal
+        source={selectedSource}
+        onClose={() => setSelectedSource(null)}
       />
     </div>
   );
