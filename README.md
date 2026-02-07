@@ -100,6 +100,66 @@ SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 GEMINI_API_KEY=your_gemini_api_key
 ```
 
+### Supabase 설정
+
+#### 1. 프로젝트 생성
+
+[Supabase](https://supabase.com)에서 새 프로젝트를 생성합니다.
+
+#### 2. 데이터베이스 스키마
+
+Supabase 대시보드의 **SQL Editor**에서 마이그레이션 파일을 순서대로 실행합니다.
+
+```
+supabase/migrations/00001_initial_schema.sql
+supabase/migrations/00002_add_users_insert_policy.sql
+```
+
+생성되는 테이블:
+
+| 테이블 | 설명 |
+|--------|------|
+| `users` | 사용자 프로필 (Auth 연동 자동 생성) |
+| `notebooks` | 노트북 |
+| `sources` | 소스 (PDF, URL, 텍스트 등) |
+| `chat_messages` | 채팅 메시지 |
+| `studio_outputs` | 스튜디오 생성 콘텐츠 |
+| `notes` | 메모 |
+
+모든 테이블에 RLS(Row Level Security)가 적용되어 있으며, 사용자별 데이터 격리가 자동으로 이루어집니다.
+
+#### 3. Google OAuth 인증 설정
+
+1. [Google Cloud Console](https://console.cloud.google.com)에서 OAuth 2.0 클라이언트 ID를 생성합니다.
+2. 승인된 리디렉션 URI에 아래 주소를 추가합니다:
+   ```
+   https://<your-project-ref>.supabase.co/auth/v1/callback
+   ```
+3. Supabase 대시보드 → **Authentication** → **Providers** → **Google**에서 Client ID와 Client Secret을 입력합니다.
+
+#### 4. Storage 버킷 설정
+
+Supabase 대시보드 → **Storage**에서 아래 버킷을 생성합니다.
+
+| 버킷명 | 공개 여부 | 용도 |
+|--------|-----------|------|
+| `sources` | Private | 소스 파일 (PDF 등) 저장 |
+| `studio` | Public | 생성된 인포그래픽/슬라이드 이미지 |
+
+`studio` 버킷의 RLS 정책 (SQL Editor에서 실행):
+
+```sql
+-- 인증된 사용자 업로드 허용
+CREATE POLICY "studio_insert" ON storage.objects
+  FOR INSERT TO authenticated
+  WITH CHECK (bucket_id = 'studio');
+
+-- 공개 읽기 허용
+CREATE POLICY "studio_select" ON storage.objects
+  FOR SELECT TO public
+  USING (bucket_id = 'studio');
+```
+
 ### 실행
 
 ```bash
