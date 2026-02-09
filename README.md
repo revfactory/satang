@@ -55,23 +55,25 @@ PDF, 웹페이지 URL, 텍스트 등 다양한 형식의 소스를 노트북에 
 ## 주요 기능
 
 - **노트북 관리** - 노트북 생성, 이름 변경, 삭제, 그리드/리스트 뷰
-- **소스 관리** - PDF, URL, 텍스트 업로드 및 AI 자동 요약/텍스트 추출
-- **AI 채팅** - 소스 기반 질의응답, 스트리밍 응답, 추천 질문
-- **스튜디오** - 인포그래픽 & 슬라이드 자료 자동 생성
-- **모바일 대응** - 데스크톱 3패널 / 모바일 탭 레이아웃
+- **소스 관리** - PDF, URL, 텍스트, 이미지, 오디오 업로드 및 AI 자동 요약/텍스트 추출
+- **AI 채팅** - 소스 기반 질의응답, 스트리밍 응답, 대화 이력 관리
+- **스튜디오** - 인포그래픽 & 슬라이드 자료 자동 생성 (병렬 생성 & 실시간 진행 표시)
+- **모바일 대응** - 데스크톱 3패널 리사이저블 / 모바일 탭 레이아웃
 
 ## 기술 스택
 
 | 영역 | 기술 |
 |------|------|
-| **프레임워크** | Next.js 16 (Turbopack) |
-| **언어** | TypeScript |
-| **스타일링** | Tailwind CSS v4 + shadcn/ui |
+| **프레임워크** | Next.js 16 (React 19, Turbopack) |
+| **언어** | TypeScript 5.9 |
+| **스타일링** | Tailwind CSS v4 + shadcn/ui (Radix UI) |
 | **상태 관리** | TanStack React Query + Zustand |
+| **폼/검증** | React Hook Form + Zod |
 | **백엔드** | Supabase (PostgreSQL + Auth + Storage) |
-| **AI** | Google Gemini |
-| **이미지 생성** | Nano Banana Pro |
+| **AI 채팅** | Google Gemini 3 Flash |
+| **이미지 생성** | Google Gemini 3 Pro Image |
 | **인증** | Google OAuth (Supabase Auth) |
+| **모니터링** | Vercel Speed Insights |
 
 ## 시작하기
 
@@ -79,7 +81,7 @@ PDF, 웹페이지 URL, 텍스트 등 다양한 형식의 소스를 노트북에 
 
 - Node.js 18+
 - Supabase 프로젝트
-- Google Gemini API 키
+- Google Gemini API 키 (Gemini 3 Flash + Gemini 3 Pro Image 사용)
 
 ### 설치
 

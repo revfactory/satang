@@ -277,7 +277,7 @@ export function SourceAddModal({
               value={textContent}
               onChange={(e) => setTextContent(e.target.value)}
               placeholder="텍스트를 붙여넣으세요..."
-              className="min-h-[120px]"
+              className="min-h-[120px] max-h-[40vh] overflow-y-auto"
             />
             <div className="flex justify-between">
               <Button
