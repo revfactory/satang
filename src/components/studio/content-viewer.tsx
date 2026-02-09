@@ -1,13 +1,14 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import {
-  Download, ChevronLeft, ChevronRight, RotateCcw, Check, X, FileDown,
+  Download, ChevronLeft, ChevronRight, RotateCcw, Check, X, FileDown, Loader2,
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { toast } from "sonner";
 import type { StudioOutput } from "@/lib/supabase/types";
 
 const TEXT_BASED_TYPES = ["mind_map", "report", "flashcard", "quiz"];
@@ -369,40 +370,47 @@ export function ContentViewer({ output, onClose }: ContentViewerProps) {
     link.click();
   };
 
-  const handleExportPdf = useCallback(() => {
-    const element = document.getElementById("report-content");
-    if (!element) return;
+  const [pdfLoading, setPdfLoading] = useState(false);
 
-    const printWindow = window.open("", "_blank");
-    if (!printWindow) return;
+  const handleExportPdf = async () => {
+    setPdfLoading(true);
+    try {
+      let endpoint: string;
+      let body: Record<string, unknown>;
 
-    const html = element.innerHTML;
-    printWindow.document.write(`<!DOCTYPE html>
-<html><head><title>${output.title}</title>
-<style>
-  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #1a1a1a; line-height: 1.7; padding: 40px; max-width: 800px; margin: 0 auto; }
-  h1 { font-size: 22px; font-weight: 700; border-bottom: 2px solid #e5e5e5; padding-bottom: 12px; margin: 32px 0 16px; }
-  h2 { font-size: 18px; font-weight: 700; margin: 28px 0 12px; }
-  h3 { font-size: 15px; font-weight: 600; margin: 24px 0 8px; }
-  p { margin: 8px 0; color: #333; }
-  strong { color: #1a1a1a; }
-  ul, ol { margin: 8px 0; padding-left: 24px; }
-  li { margin: 4px 0; }
-  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13px; }
-  th { background: #f5f5f5; font-weight: 600; text-align: left; padding: 8px 12px; border: 1px solid #ddd; }
-  td { padding: 8px 12px; border: 1px solid #ddd; }
-  code { background: #f5f3ff; color: #6D28D9; padding: 2px 6px; border-radius: 4px; font-size: 13px; }
-  pre { background: #f5f5f5; padding: 16px; border-radius: 8px; overflow-x: auto; }
-  pre code { background: none; padding: 0; }
-  blockquote { border-left: 3px solid #6D28D9; background: #faf5ff; margin: 16px 0; padding: 12px 16px; border-radius: 0 8px 8px 0; }
-  @media print { body { padding: 0; } }
-</style></head><body>${html}</body></html>`);
-    printWindow.document.close();
-    printWindow.onload = () => {
-      printWindow.print();
-      printWindow.close();
-    };
-  }, [output.title]);
+      if (isSlides || output.type === "infographic") {
+        // Slides / Infographic: image-based PDF
+        endpoint = "/api/studio/slides/pdf";
+        body = { imageUrls: images, title: output.title };
+      } else {
+        // Report: markdown-based PDF
+        const content = output.content as { markdown?: string };
+        if (!content?.markdown) return;
+        endpoint = "/api/studio/report/pdf";
+        body = { markdown: content.markdown, title: output.title };
+      }
+
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+
+      if (!response.ok) throw new Error("PDF generation failed");
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${output.title || "download"}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      toast.error("PDF 다운로드에 실패했습니다.");
+    } finally {
+      setPdfLoading(false);
+    }
+  };
 
   // Clamp currentSlide to valid range for available images
   const safeSlide = Math.min(currentSlide, Math.max(0, images.length - 1));
@@ -417,15 +425,31 @@ export function ContentViewer({ output, onClose }: ContentViewerProps) {
           </DialogTitle>
           <div className="flex items-center gap-2 shrink-0">
             {!isTextBased && images.length > 0 && (
-              <Button variant="outline" size="sm" onClick={handleDownload}>
-                <Download className="w-4 h-4 mr-1" />
-                다운로드
-              </Button>
+              <>
+                <Button variant="outline" size="sm" onClick={handleDownload}>
+                  <Download className="w-4 h-4 mr-1" />
+                  이미지 저장
+                </Button>
+                {output.generation_status === "completed" && (
+                  <Button variant="outline" size="sm" onClick={handleExportPdf} disabled={pdfLoading}>
+                    {pdfLoading ? (
+                      <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                    ) : (
+                      <FileDown className="w-4 h-4 mr-1" />
+                    )}
+                    {pdfLoading ? "생성 중..." : "PDF 다운로드"}
+                  </Button>
+                )}
+              </>
             )}
             {isReport && output.generation_status === "completed" && (
-              <Button variant="outline" size="sm" onClick={handleExportPdf}>
-                <FileDown className="w-4 h-4 mr-1" />
-                PDF 다운로드
+              <Button variant="outline" size="sm" onClick={handleExportPdf} disabled={pdfLoading}>
+                {pdfLoading ? (
+                  <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                ) : (
+                  <FileDown className="w-4 h-4 mr-1" />
+                )}
+                {pdfLoading ? "생성 중..." : "PDF 다운로드"}
               </Button>
             )}
             <button
