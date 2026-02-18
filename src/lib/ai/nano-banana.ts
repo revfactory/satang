@@ -75,12 +75,90 @@ ${userPrompt ? `Additional style instructions: ${userPrompt}` : ""}`;
   };
 }
 
+export type SlideType = "cover" | "toc" | "section" | "content" | "key_takeaway" | "closing";
+
+export interface DesignTheme {
+  primaryColor: string;
+  mood: string;
+  style: string;
+}
+
+const SLIDE_TYPE_PROMPTS: Record<SlideType, (params: { title: string; subtitle?: string; content: string; format: string }) => string> = {
+  cover: ({ title, subtitle, format }) => {
+    const base = `This is the COVER slide (title slide).
+Layout:
+- Large, bold title "${title}" centered prominently
+${subtitle ? `- Subtitle "${subtitle}" below the title in smaller text` : ""}
+- Clean, impactful background with minimal elements
+- No bullet points or body text`;
+    return format === "presenter"
+      ? `${base}\n- Extra emphasis on visual impact, very minimal text`
+      : base;
+  },
+  toc: ({ content, format }) => {
+    const base = `This is a TABLE OF CONTENTS slide.
+Layout:
+- Title "목차" or "Table of Contents" at the top
+- Numbered list of sections with clear visual separation
+- Content: ${content}
+- Use subtle icons or dividers between items`;
+    return format === "presenter"
+      ? `${base}\n- Keep text minimal, use icons to represent each section`
+      : base;
+  },
+  section: ({ title, format }) => {
+    const base = `This is a SECTION DIVIDER slide.
+Layout:
+- Section title "${title}" displayed large and centered
+- Minimal background, acts as a visual break between topics
+- No bullet points or detailed text`;
+    return format === "presenter"
+      ? `${base}\n- Bold, dramatic typography with visual impact`
+      : base;
+  },
+  content: ({ title, content, format }) => {
+    const base = `This is a CONTENT slide.
+Layout:
+- Title "${title}" at the top
+- Key points presented as bullet points or short paragraphs
+- Content: ${content}`;
+    return format === "presenter"
+      ? `${base}\n- Visual-focused: use large keywords, icons, and diagrams instead of full sentences\n- Maximum 3-4 key words or short phrases visible`
+      : `${base}\n- Include detailed explanations with clear text hierarchy\n- Use bullet points with supporting details`;
+  },
+  key_takeaway: ({ title, content, format }) => {
+    const base = `This is a KEY TAKEAWAY / SUMMARY slide.
+Layout:
+- Title "${title}" at the top
+- Highlight 3-5 key points with emphasis (bold, icons, or numbered)
+- Content: ${content}
+- Use visual emphasis (larger text, highlight boxes, or icons) for each point`;
+    return format === "presenter"
+      ? `${base}\n- Use large icons or numbers with single keywords for each takeaway`
+      : base;
+  },
+  closing: ({ title, content, format }) => {
+    const base = `This is the CLOSING slide.
+Layout:
+- "${title}" displayed prominently
+- ${content || "Thank you message"}
+- Clean, elegant design matching the cover slide style
+- Optional: contact info or QR code area at bottom`;
+    return format === "presenter"
+      ? `${base}\n- Very minimal, focus on a memorable closing visual`
+      : base;
+  },
+};
+
 export async function generateSlideImage(params: {
   slideNumber: number;
   totalSlides: number;
   topic: string;
   slideTitle: string;
   slideContent: string;
+  slideType?: SlideType;
+  subtitle?: string;
+  designTheme?: DesignTheme;
   language: string;
   format: string;
   userPrompt: string;
@@ -91,6 +169,9 @@ export async function generateSlideImage(params: {
     topic,
     slideTitle,
     slideContent,
+    slideType = "content",
+    subtitle,
+    designTheme,
     language,
     format,
     userPrompt,
@@ -106,25 +187,38 @@ export async function generateSlideImage(params: {
     de: "German",
   };
 
-  const formatStyle =
-    format === "presenter"
-      ? "visual-focused with minimal text, large key words"
-      : "text-rich with detailed explanations";
+  const langName = languageNames[language] || "Korean";
 
-  const prompt = `Create slide ${slideNumber} of ${totalSlides} for a ${formatStyle} presentation.
-Language: ${languageNames[language] || "Korean"}
+  const typePrompt = SLIDE_TYPE_PROMPTS[slideType]?.({
+    title: slideTitle,
+    subtitle,
+    content: slideContent,
+    format,
+  }) ?? SLIDE_TYPE_PROMPTS.content({
+    title: slideTitle,
+    content: slideContent,
+    format,
+  });
+
+  const themeInstructions = designTheme
+    ? `Design Theme (apply consistently):
+- Primary color: ${designTheme.primaryColor}
+- Mood: ${designTheme.mood}
+- Style: ${designTheme.style}
+`
+    : "";
+
+  const prompt = `Create slide ${slideNumber} of ${totalSlides} for a professional presentation.
+Language: ${langName}
 Overall topic: ${topic}
 
-This slide:
-- Title: ${slideTitle}
-- Key points: ${slideContent}
+${typePrompt}
 
-Style: Professional presentation slide, 16:9 aspect ratio.
-Requirements:
-- All text in ${languageNames[language] || "Korean"}
-- Consistent visual style suitable for a professional presentation
+${themeInstructions}Global Requirements:
+- All text MUST be in ${langName}
+- 16:9 aspect ratio, professional presentation slide
 - Clear, readable typography with good hierarchy
-- Modern design with appropriate use of color
+- Consistent visual style across all slides in this deck
 
 ${userPrompt ? `Additional instructions: ${userPrompt}` : ""}`;
 

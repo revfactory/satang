@@ -1,6 +1,6 @@
 import { NextResponse, after } from "next/server";
 import { createServerSupabaseClient, createServiceRoleClient } from "@/lib/supabase/server";
-import { generateSlideImage } from "@/lib/ai/nano-banana";
+import { generateSlideImage, type SlideType, type DesignTheme } from "@/lib/ai/nano-banana";
 import { generateText } from "@/lib/ai/gemini";
 
 async function runWithConcurrency<T>(
@@ -41,7 +41,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { notebookId, format, language, depth, prompt } =
+    const { notebookId, format, language, depth, prompt, slideCount } =
       await request.json();
 
     if (!notebookId) {
@@ -74,7 +74,7 @@ export async function POST(request: Request) {
         user_id: user.id,
         type: "slide_deck",
         title: `슬라이드 - ${new Date().toLocaleDateString("ko-KR")}`,
-        settings: { format, language, depth, prompt },
+        settings: { format, language, depth, prompt, slideCount },
         generation_status: "generating",
         source_ids: sources.map((s) => s.id),
       })
@@ -113,8 +113,9 @@ export async function POST(request: Request) {
           )
           .join("\n\n");
 
-        const slideCountRange =
-          format === "presenter"
+        const slideCountRange = slideCount
+          ? `정확히 ${slideCount}`
+          : format === "presenter"
             ? depth === "short"
               ? "4-5"
               : "5-8"
@@ -124,32 +125,83 @@ export async function POST(request: Request) {
 
         // Generate slide outline with Gemini
         console.log(`[Slides ${outputId}] Gemini 아웃라인 생성 중...`);
-        const outlinePrompt = `다음 소스 내용을 기반으로 ${slideCountRange}장의 슬라이드 아웃라인을 JSON 형식으로 생성해주세요.
+
+        const formatDescription = format === "presenter"
+          ? "발표자용 (시각 중심, 텍스트 최소화, 키워드와 이미지 위주)"
+          : "상세형 (텍스트 풍부, 자세한 설명 포함)";
+
+        const outlinePrompt = `다음 소스 내용을 기반으로 전문적인 프레젠테이션 슬라이드 아웃라인을 JSON으로 생성해주세요.
 
 소스 내용:
 ${sourceTexts.slice(0, 15000)}
 
+슬라이드 수: ${slideCountRange}장
+형식: ${formatDescription}
 ${prompt ? `추가 지시사항: ${prompt}` : ""}
 
-다음 JSON 형식으로 응답해주세요 (코드블록 없이 순수 JSON만):
-[
-  {"title": "슬라이드 제목", "content": "이 슬라이드의 핵심 내용 (2-3줄)"},
-  ...
-]`;
+## 프레젠테이션 구조 규칙
+
+반드시 다음 흐름을 따르세요:
+1. 첫 번째 슬라이드는 type "cover" (표지)
+2. 슬라이드 수가 7장 이상이면 두 번째에 type "toc" (목차) 포함
+3. 중간 슬라이드들은 type "content" (본문) — 필요시 type "section" (섹션 구분) 사용
+4. 마지막에서 두 번째는 type "key_takeaway" (핵심 정리)
+5. 마지막 슬라이드는 type "closing" (마무리)
+
+## 디자인 테마
+
+소스 내용의 주제와 분위기에 맞는 디자인 테마를 하나 선정하세요.
+
+## JSON 형식 (코드블록 없이 순수 JSON만 응답)
+
+{
+  "designTheme": {
+    "primaryColor": "#hex색상코드",
+    "mood": "분위기 설명 (예: professional and modern)",
+    "style": "스타일 설명 (예: minimal with bold typography)"
+  },
+  "slides": [
+    {"type": "cover", "title": "프레젠테이션 제목", "subtitle": "부제목", "content": ""},
+    {"type": "toc", "title": "목차", "content": "1. 섹션1\\n2. 섹션2\\n3. 섹션3"},
+    {"type": "content", "title": "슬라이드 제목", "content": "핵심 내용 2-3줄"},
+    {"type": "key_takeaway", "title": "핵심 정리", "content": "주요 포인트 요약"},
+    {"type": "closing", "title": "감사합니다", "content": "Q&A"}
+  ]
+}
+
+가능한 type 값: "cover", "toc", "section", "content", "key_takeaway", "closing"`;
 
         const outlineText = await generateText(outlinePrompt);
 
-        // Parse outline
-        let slides: Array<{ title: string; content: string }>;
+        // Parse outline (new structure with designTheme)
+        interface SlideOutline {
+          type?: SlideType;
+          title: string;
+          subtitle?: string;
+          content: string;
+        }
+        let slides: SlideOutline[];
+        let designTheme: DesignTheme | undefined;
+
         try {
-          const jsonMatch = outlineText.match(/\[[\s\S]*\]/);
-          slides = JSON.parse(jsonMatch?.[0] || outlineText);
+          const jsonMatch = outlineText.match(/\{[\s\S]*\}/);
+          const parsed = JSON.parse(jsonMatch?.[0] || outlineText);
+
+          if (parsed.slides && Array.isArray(parsed.slides)) {
+            slides = parsed.slides;
+            designTheme = parsed.designTheme;
+          } else if (Array.isArray(parsed)) {
+            // Fallback: old array format
+            slides = parsed;
+          } else {
+            throw new Error("Unexpected format");
+          }
         } catch {
           slides = [
-            { title: "개요", content: "프레젠테이션 개요 슬라이드입니다." },
+            { type: "cover", title: "개요", content: "프레젠테이션 개요 슬라이드입니다." },
           ];
         }
-        console.log(`[Slides ${outputId}] 아웃라인 완료 - ${slides.length}장`);
+        console.log(`[Slides ${outputId}] 아웃라인 완료 - ${slides.length}장, 테마: ${designTheme?.mood || "기본"}`);
 
         // Determine topic
         const topic = slides[0]?.title || "프레젠테이션";
@@ -173,18 +225,35 @@ ${prompt ? `추가 지시사항: ${prompt}` : ""}
         let failedCount = 0;
 
         const tasks = slides.map((slide, i) => async () => {
-          console.log(`[Slides ${outputId}] 슬라이드 ${i + 1}/${slides.length} 이미지 생성 중...`);
+          console.log(`[Slides ${outputId}] 슬라이드 ${i + 1}/${slides.length} (${slide.type || "content"}) 이미지 생성 중...`);
 
-          const { imageData, mimeType } = await generateSlideImage({
+          const generateParams = {
             slideNumber: i + 1,
             totalSlides: slides.length,
             topic,
             slideTitle: slide.title,
             slideContent: slide.content,
+            slideType: (slide.type || "content") as SlideType,
+            subtitle: slide.subtitle,
+            designTheme,
             language,
             format,
             userPrompt: prompt,
-          });
+          };
+
+          // 1회 자동 재시도 로직
+          let imageData: string;
+          let mimeType: string;
+          try {
+            const result = await generateSlideImage(generateParams);
+            imageData = result.imageData;
+            mimeType = result.mimeType;
+          } catch (firstError) {
+            console.warn(`[Slides ${outputId}] 슬라이드 ${i + 1} 첫 시도 실패, 재시도 중...`, firstError instanceof Error ? firstError.message : firstError);
+            const result = await generateSlideImage(generateParams);
+            imageData = result.imageData;
+            mimeType = result.mimeType;
+          }
 
           // Upload
           const ext = mimeType.includes("png") ? "png" : "jpg";
