@@ -92,7 +92,7 @@ export function SlideModal({ open, onClose, notebookId }: SlideModalProps) {
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-5">
+        <div className="space-y-5 min-w-0">
           {/* Format */}
           <div>
             <label className="text-[13px] font-medium text-text-secondary block mb-2">
