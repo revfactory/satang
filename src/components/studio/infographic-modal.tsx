@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Loader2, BarChart3 } from "lucide-react";
 import { useGenerateInfographic } from "@/hooks/use-studio";
+import { ThemeSelector } from "@/components/studio/theme-selector";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -50,6 +51,7 @@ export function InfographicModal({
   const [language, setLanguage] = useState("ko");
   const [orientation, setOrientation] = useState("landscape");
   const [detailLevel, setDetailLevel] = useState("standard");
+  const [designThemeId, setDesignThemeId] = useState<string | null>(null);
   const [prompt, setPrompt] = useState("");
 
   const generate = useGenerateInfographic();
@@ -62,6 +64,7 @@ export function InfographicModal({
         orientation,
         detailLevel,
         prompt,
+        designThemeId: designThemeId || undefined,
       });
       toast.success("인포그래픽 생성이 시작되었습니다.");
       onClose();
@@ -148,10 +151,16 @@ export function InfographicModal({
             </div>
           </div>
 
+          {/* Design Theme */}
+          <ThemeSelector
+            selectedThemeId={designThemeId}
+            onSelect={setDesignThemeId}
+          />
+
           {/* Prompt */}
           <div>
             <label className="text-[13px] font-medium text-text-secondary block mb-2">
-              만들려는 인포그래픽에 대한 설명
+              콘텐츠 설명
             </label>
             <Textarea
               value={prompt}

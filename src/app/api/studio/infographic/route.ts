@@ -14,7 +14,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { notebookId, language, orientation, detailLevel, prompt } =
+    const { notebookId, language, orientation, detailLevel, prompt, designThemeId } =
       await request.json();
 
     if (!notebookId) {
@@ -47,7 +47,7 @@ export async function POST(request: Request) {
         user_id: user.id,
         type: "infographic",
         title: `인포그래픽 - ${new Date().toLocaleDateString("ko-KR")}`,
-        settings: { language, orientation, detailLevel, prompt },
+        settings: { language, orientation, detailLevel, prompt, designThemeId },
         generation_status: "generating",
         source_ids: sources.map((s) => s.id),
       })
@@ -70,6 +70,23 @@ export async function POST(request: Request) {
       try {
         console.log(`[Infographic ${outputId}] 생성 시작 - 소스 ${sources.length}개`);
 
+        // Fetch user design theme if specified
+        let designTheme: { primaryColor: string; mood: string; style: string } | undefined;
+        if (designThemeId) {
+          const { data: themeRow } = await adminClient
+            .from("design_themes")
+            .select("primary_color, mood, style")
+            .eq("id", designThemeId)
+            .single();
+          if (themeRow) {
+            designTheme = {
+              primaryColor: themeRow.primary_color,
+              mood: themeRow.mood,
+              style: themeRow.style,
+            };
+          }
+        }
+
         // Summarize sources for infographic content
         const sourceTexts = sources
           .map((s) => `[${s.title}]\n${(s.extracted_text || "").slice(0, 5000)}`)
@@ -89,6 +106,7 @@ export async function POST(request: Request) {
           orientation,
           detailLevel,
           userPrompt: prompt,
+          designTheme,
         });
         console.log(`[Infographic ${outputId}] 이미지 생성 완료 (${mimeType})`);
 

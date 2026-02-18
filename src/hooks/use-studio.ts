@@ -39,6 +39,7 @@ export function useGenerateInfographic() {
       orientation: string;
       detailLevel: string;
       prompt: string;
+      designThemeId?: string;
     }) => {
       const response = await fetch("/api/studio/infographic", {
         method: "POST",
@@ -72,6 +73,7 @@ export function useGenerateSlides() {
       depth: string;
       prompt: string;
       slideCount?: number;
+      designThemeId?: string;
     }) => {
       const response = await fetch("/api/studio/slides", {
         method: "POST",
@@ -201,8 +203,8 @@ export function useRetryStudioOutput() {
 
       const baseBody = { notebookId: output.notebook_id, language: settings.language || "ko", prompt: settings.prompt || "" };
       const bodyMap: Record<string, object> = {
-        infographic: { ...baseBody, orientation: settings.orientation || "landscape", detailLevel: settings.detailLevel || "standard" },
-        slide_deck: { ...baseBody, format: settings.format || "detailed", depth: settings.depth || "default", slideCount: settings.slideCount ? Number(settings.slideCount) : undefined },
+        infographic: { ...baseBody, orientation: settings.orientation || "landscape", detailLevel: settings.detailLevel || "standard", designThemeId: settings.designThemeId || undefined },
+        slide_deck: { ...baseBody, format: settings.format || "detailed", depth: settings.depth || "default", slideCount: settings.slideCount ? Number(settings.slideCount) : undefined, designThemeId: settings.designThemeId || undefined },
         mind_map: baseBody,
         report: { ...baseBody, detailLevel: settings.detailLevel || "standard" },
         flashcard: { ...baseBody, cardCount: Number(settings.cardCount) || 10 },

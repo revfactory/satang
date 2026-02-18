@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Loader2, Presentation, Check } from "lucide-react";
 import { useGenerateSlides } from "@/hooks/use-studio";
+import { ThemeSelector } from "@/components/studio/theme-selector";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -55,6 +56,7 @@ export function SlideModal({ open, onClose, notebookId }: SlideModalProps) {
   const [language, setLanguage] = useState("ko");
   const [depth, setDepth] = useState("default");
   const [slideCount, setSlideCount] = useState("");
+  const [designThemeId, setDesignThemeId] = useState<string | null>(null);
   const [prompt, setPrompt] = useState("");
 
   const generate = useGenerateSlides();
@@ -68,6 +70,7 @@ export function SlideModal({ open, onClose, notebookId }: SlideModalProps) {
         depth,
         prompt,
         slideCount: slideCount ? parseInt(slideCount, 10) : undefined,
+        designThemeId: designThemeId || undefined,
       });
       toast.success("슬라이드 생성이 시작되었습니다.");
       onClose();
@@ -186,10 +189,16 @@ export function SlideModal({ open, onClose, notebookId }: SlideModalProps) {
             </div>
           </div>
 
+          {/* Design Theme */}
+          <ThemeSelector
+            selectedThemeId={designThemeId}
+            onSelect={setDesignThemeId}
+          />
+
           {/* Prompt */}
           <div>
             <label className="text-[13px] font-medium text-text-secondary block mb-2">
-              만들려는 슬라이드 자료에 대한 설명
+              콘텐츠 설명
             </label>
             <Textarea
               value={prompt}

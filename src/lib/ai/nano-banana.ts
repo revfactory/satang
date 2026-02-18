@@ -14,8 +14,9 @@ export async function generateInfographicImage(params: {
   orientation: string;
   detailLevel: string;
   userPrompt: string;
+  designTheme?: { primaryColor: string; mood: string; style: string };
 }): Promise<{ imageData: string; mimeType: string }> {
-  const { sourceContent, language, orientation, detailLevel, userPrompt } =
+  const { sourceContent, language, orientation, detailLevel, userPrompt, designTheme } =
     params;
 
   const languageNames: Record<string, string> = {
@@ -34,19 +35,29 @@ export async function generateInfographicImage(params: {
     detailed: "comprehensive with in-depth data points",
   };
 
+  const themeBlock = designTheme
+    ? `
+Design Theme (apply consistently):
+- Primary color: ${designTheme.primaryColor}
+- Mood: ${designTheme.mood}
+- Style: ${designTheme.style}
+- Use this color as the dominant accent throughout the infographic
+`
+    : "";
+
   const prompt = `Create a professional infographic in ${languageNames[language] || "Korean"}.
 
 Topic and key data points from sources:
 ${sourceContent.slice(0, 8000)}
 
 Detail level: ${detailLabels[detailLevel] || "standard level of detail"}
-
+${themeBlock}
 Requirements:
 - All text must be in ${languageNames[language] || "Korean"}
 - Use clean, modern design with clear visual hierarchy
 - Include relevant icons, charts, and data visualizations
 - Ensure all text is legible and properly rendered
-- Professional color scheme with good contrast
+${designTheme ? "- Follow the specified design theme consistently" : "- Professional color scheme with good contrast"}
 
 ${userPrompt ? `Additional style instructions: ${userPrompt}` : ""}`;
 

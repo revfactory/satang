@@ -41,7 +41,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { notebookId, format, language, depth, prompt, slideCount } =
+    const { notebookId, format, language, depth, prompt, slideCount, designThemeId } =
       await request.json();
 
     if (!notebookId) {
@@ -74,7 +74,7 @@ export async function POST(request: Request) {
         user_id: user.id,
         type: "slide_deck",
         title: `슬라이드 - ${new Date().toLocaleDateString("ko-KR")}`,
-        settings: { format, language, depth, prompt, slideCount },
+        settings: { format, language, depth, prompt, slideCount, designThemeId },
         generation_status: "generating",
         source_ids: sources.map((s) => s.id),
       })
@@ -106,6 +106,23 @@ export async function POST(request: Request) {
             },
           })
           .eq("id", outputId);
+
+        // Fetch user design theme if specified
+        let userDesignTheme: DesignTheme | undefined;
+        if (designThemeId) {
+          const { data: themeRow } = await adminClient
+            .from("design_themes")
+            .select("primary_color, mood, style")
+            .eq("id", designThemeId)
+            .single();
+          if (themeRow) {
+            userDesignTheme = {
+              primaryColor: themeRow.primary_color,
+              mood: themeRow.mood,
+              style: themeRow.style,
+            };
+          }
+        }
 
         const sourceTexts = sources
           .map(
@@ -150,7 +167,12 @@ ${prompt ? `추가 지시사항: ${prompt}` : ""}
 
 ## 디자인 테마
 
-소스 내용의 주제와 분위기에 맞는 디자인 테마를 하나 선정하세요.
+${userDesignTheme
+  ? `다음 사용자 지정 테마를 그대로 사용하세요:
+- primaryColor: "${userDesignTheme.primaryColor}"
+- mood: "${userDesignTheme.mood}"
+- style: "${userDesignTheme.style}"`
+  : "소스 내용의 주제와 분위기에 맞는 디자인 테마를 하나 선정하세요."}
 
 ## JSON 형식 (코드블록 없이 순수 JSON만 응답)
 
@@ -200,6 +222,10 @@ ${prompt ? `추가 지시사항: ${prompt}` : ""}
           slides = [
             { type: "cover", title: "개요", content: "프레젠테이션 개요 슬라이드입니다." },
           ];
+        }
+        // Override with user theme if provided
+        if (userDesignTheme) {
+          designTheme = userDesignTheme;
         }
         console.log(`[Slides ${outputId}] 아웃라인 완료 - ${slides.length}장, 테마: ${designTheme?.mood || "기본"}`);
 

@@ -195,6 +195,39 @@ export interface Database {
           updated_at?: string;
         };
       };
+      design_themes: {
+        Row: {
+          id: string;
+          user_id: string;
+          name: string;
+          primary_color: string;
+          mood: string;
+          style: string;
+          thumbnail_url: string | null;
+          sort_order: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          name: string;
+          primary_color?: string;
+          mood?: string;
+          style?: string;
+          thumbnail_url?: string | null;
+          sort_order?: number;
+        };
+        Update: {
+          name?: string;
+          primary_color?: string;
+          mood?: string;
+          style?: string;
+          thumbnail_url?: string | null;
+          sort_order?: number;
+          updated_at?: string;
+        };
+      };
       notes: {
         Row: {
           id: string;
@@ -235,3 +268,4 @@ export type Source = Tables<"sources">;
 export type ChatMessage = Tables<"chat_messages">;
 export type StudioOutput = Tables<"studio_outputs">;
 export type Note = Tables<"notes">;
+export type DesignThemeRow = Tables<"design_themes">;
