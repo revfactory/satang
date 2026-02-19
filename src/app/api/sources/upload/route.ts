@@ -39,7 +39,8 @@ export async function POST(request: Request) {
     }
 
     // Upload to Supabase Storage
-    const fileName = `${user.id}/${notebookId}/${Date.now()}-${file.name}`;
+    const safeName = file.name.replace(/[^a-zA-Z0-9가-힣._-]/g, '_');
+    const fileName = `${user.id}/${notebookId}/${Date.now()}-${safeName}`;
     const { error: uploadError } = await supabase.storage
       .from("sources")
       .upload(fileName, file);
