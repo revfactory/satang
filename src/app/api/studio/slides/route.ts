@@ -156,7 +156,7 @@ ${prompt ? `추가 지시사항: ${prompt}` : ""}
 
 반드시 다음 흐름을 따르세요:
 1. 첫 번째 슬라이드는 type "cover" (표지)
-2. 슬라이드 수가 7장 이상이면 두 번째에 type "toc" (목차) 포함
+2. 두 번째 슬라이드는 반드시 type "toc" (목차)를 포함 — 절대 생략하지 마세요
 3. 중간 슬라이드들은 type "content" (본문) — 필요시 type "section" (섹션 구분) 사용
 4. 마지막에서 두 번째는 type "key_takeaway" (핵심 정리)
 5. 마지막 슬라이드는 type "closing" (마무리)
@@ -216,6 +216,19 @@ ${userThemePrompt
             { type: "cover", title: "개요", content: "프레젠테이션 개요 슬라이드입니다." },
           ];
         }
+        // 7장 이상인데 목차가 없으면 자동 삽입
+        if (slides.length >= 7 && !slides.some((s) => s.type === "toc")) {
+          const contentSlides = slides.filter((s) => s.type === "content" || s.type === "section");
+          const tocContent = contentSlides
+            .map((s, i) => `${i + 1}. ${s.title}`)
+            .join("\n");
+          slides.splice(1, 0, {
+            type: "toc",
+            title: "목차",
+            content: tocContent,
+          });
+        }
+
         // 최대 50장 제한
         const MAX_SLIDES = 50;
         if (slides.length > MAX_SLIDES) {
