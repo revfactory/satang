@@ -478,49 +478,49 @@ export function ContentViewer({ output, onClose }: ContentViewerProps) {
 
   return (
     <Dialog open onOpenChange={onClose}>
-      <DialogContent showCloseButton={false} className="sm:max-w-[min(1200px,calc(100vw-4rem))] max-h-[calc(100vh-4rem)] p-0 gap-0 overflow-hidden">
+      <DialogContent showCloseButton={false} className="max-w-[calc(100vw-1rem)] sm:max-w-[min(1200px,calc(100vw-4rem))] max-h-[calc(100vh-2rem)] sm:max-h-[calc(100vh-4rem)] p-0 gap-0 overflow-hidden">
         {/* Header */}
-        <DialogHeader className="flex flex-row items-center justify-between px-4 py-2.5 border-b border-border-default space-y-0">
-          <DialogTitle className="text-sm font-semibold text-text-primary truncate">
+        <DialogHeader className="flex flex-row items-center justify-between px-3 sm:px-4 py-2.5 border-b border-border-default space-y-0 min-w-0">
+          <DialogTitle className="text-sm font-semibold text-text-primary truncate min-w-0">
             {output.title}
           </DialogTitle>
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
             {!isTextBased && images.length > 0 && (
               <>
-                <Button variant="outline" size="sm" onClick={handleDownload}>
-                  <Download className="w-4 h-4 mr-1" />
-                  이미지 저장
+                <Button variant="outline" size="sm" onClick={handleDownload} className="px-2 sm:px-3">
+                  <Download className="w-4 h-4 sm:mr-1" />
+                  <span className="hidden sm:inline">이미지 저장</span>
                 </Button>
                 {output.generation_status === "completed" && (
                   <>
-                    <Button variant="outline" size="sm" onClick={handleExportPptx} disabled={pptxLoading}>
+                    <Button variant="outline" size="sm" onClick={handleExportPptx} disabled={pptxLoading} className="px-2 sm:px-3">
                       {pptxLoading ? (
-                        <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                        <Loader2 className="w-4 h-4 sm:mr-1 animate-spin" />
                       ) : (
-                        <FileText className="w-4 h-4 mr-1" />
+                        <FileText className="w-4 h-4 sm:mr-1" />
                       )}
-                      {pptxLoading ? "생성 중..." : "PPTX"}
+                      <span className="hidden sm:inline">{pptxLoading ? "생성 중..." : "PPTX"}</span>
                     </Button>
-                    <Button variant="outline" size="sm" onClick={handleExportPdf} disabled={pdfLoading}>
+                    <Button variant="outline" size="sm" onClick={handleExportPdf} disabled={pdfLoading} className="px-2 sm:px-3">
                       {pdfLoading ? (
-                        <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                        <Loader2 className="w-4 h-4 sm:mr-1 animate-spin" />
                       ) : (
-                        <FileDown className="w-4 h-4 mr-1" />
+                        <FileDown className="w-4 h-4 sm:mr-1" />
                       )}
-                      {pdfLoading ? "생성 중..." : "PDF"}
+                      <span className="hidden sm:inline">{pdfLoading ? "생성 중..." : "PDF"}</span>
                     </Button>
                   </>
                 )}
               </>
             )}
             {isReport && output.generation_status === "completed" && (
-              <Button variant="outline" size="sm" onClick={handleExportPdf} disabled={pdfLoading}>
+              <Button variant="outline" size="sm" onClick={handleExportPdf} disabled={pdfLoading} className="px-2 sm:px-3">
                 {pdfLoading ? (
-                  <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                  <Loader2 className="w-4 h-4 sm:mr-1 animate-spin" />
                 ) : (
-                  <FileDown className="w-4 h-4 mr-1" />
+                  <FileDown className="w-4 h-4 sm:mr-1" />
                 )}
-                {pdfLoading ? "생성 중..." : "PDF 다운로드"}
+                <span className="hidden sm:inline">{pdfLoading ? "생성 중..." : "PDF 다운로드"}</span>
               </Button>
             )}
             <button
@@ -719,17 +719,19 @@ export function ContentViewer({ output, onClose }: ContentViewerProps) {
 
         {/* Slide Indicators */}
         {((isSlides && !isGenerating) || (isGenerating && images.length > 1)) && (
-          <div className="flex items-center justify-center gap-2 py-3 border-t border-border-default">
-            {images.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setCurrentSlide(i)}
-                className={`w-2 h-2 rounded-full transition-colors cursor-pointer ${
-                  i === (isGenerating ? safeSlide : currentSlide) ? "bg-brand" : "bg-gray-300"
-                }`}
-              />
-            ))}
-            <span className="text-xs text-text-muted ml-2">
+          <div className="flex items-center justify-center gap-1 py-3 px-3 border-t border-border-default overflow-x-auto">
+            <div className="flex items-center gap-1 shrink-0">
+              {images.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setCurrentSlide(i)}
+                  className={`w-2 h-2 rounded-full transition-colors cursor-pointer shrink-0 ${
+                    i === (isGenerating ? safeSlide : currentSlide) ? "bg-brand" : "bg-gray-300"
+                  }`}
+                />
+              ))}
+            </div>
+            <span className="text-xs text-text-muted ml-2 whitespace-nowrap shrink-0">
               {(isGenerating ? safeSlide : currentSlide) + 1} / {images.length}
               {isGenerating && progress?.total ? ` (총 ${progress.total}장)` : ""}
             </span>
