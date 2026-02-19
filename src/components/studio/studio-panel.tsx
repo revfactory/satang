@@ -175,9 +175,9 @@ export function StudioPanel({ notebookId }: StudioPanelProps) {
                       <p className="text-[13px] font-medium text-text-primary truncate">
                         {output.title}
                       </p>
-                      {output.generation_status === "failed" && output.error_message ? (
+                      {output.generation_status === "failed" || isStuck(output) ? (
                         <p className="text-[11px] text-error truncate">
-                          {output.error_message}
+                          {output.error_message || (isStuck(output) ? "시간 초과로 생성이 중단되었습니다" : "생성에 실패했습니다")}
                         </p>
                       ) : (
                         <p className="text-[11px] text-text-muted">
