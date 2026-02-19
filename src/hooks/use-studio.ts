@@ -1,11 +1,40 @@
 "use client";
 
+import { useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/lib/supabase/client";
 import type { StudioOutput, StudioOutputType } from "@/lib/supabase/types";
 
 export function useStudioOutputs(notebookId: string) {
   const supabase = createClient();
+  const queryClient = useQueryClient();
+
+  // Supabase Realtime 구독으로 변경사항 즉시 반영
+  useEffect(() => {
+    if (!notebookId) return;
+
+    const channel = supabase
+      .channel(`studio-outputs:${notebookId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "studio_outputs",
+          filter: `notebook_id=eq.${notebookId}`,
+        },
+        () => {
+          queryClient.invalidateQueries({
+            queryKey: ["studio-outputs", notebookId],
+          });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [notebookId, supabase, queryClient]);
 
   return useQuery({
     queryKey: ["studio-outputs", notebookId],
@@ -20,12 +49,6 @@ export function useStudioOutputs(notebookId: string) {
       return data as StudioOutput[];
     },
     enabled: !!notebookId,
-    refetchInterval: (query) => {
-      const hasGenerating = query.state.data?.some(
-        (o) => o.generation_status === "generating"
-      );
-      return hasGenerating ? 2000 : false;
-    },
   });
 }
 
