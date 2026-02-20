@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { BookOpen } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { HomeNav } from "@/components/shared/home-nav";
 import { NotebookCard } from "@/components/notebook/notebook-card";
 import { NewNotebookCard } from "@/components/notebook/new-notebook-card";
@@ -85,9 +86,55 @@ export function HomeClient({ user }: HomeClientProps) {
       />
 
       <main className="max-w-[1440px] mx-auto px-6 sm:px-8 py-10 fade-in">
+
+        {/* Hero Welcome Banner */}
+        <section className="mb-12 relative overflow-hidden rounded-[32px] border border-white/60 shadow-sm transition-all duration-500 hover:shadow-md group">
+
+          {/* Banner Background Image */}
+          <div className="absolute inset-0 z-0">
+            <Image
+              src="/images/home_banner.png"
+              alt="Knowledge exploration banner"
+              fill
+              className="object-cover object-center"
+              priority
+            />
+          </div>
+
+          {/* Glassmorphism Overlay for text readability */}
+          <div className="absolute inset-0 bg-gradient-to-r from-white/80 via-white/60 to-transparent z-[1]" />
+
+          <div className="relative z-10 max-w-2xl p-8 sm:p-12">
+            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-text-primary mb-4 drop-shadow-sm">
+              환영합니다, <span className="text-brand bg-clip-text text-transparent bg-gradient-to-r from-brand to-brand-active drop-shadow-sm">{user.display_name || "사용자"}</span>님!
+            </h1>
+            <p className="text-lg text-text-secondary mb-8 leading-relaxed font-medium">
+              오늘은 어떤 지식을 탐험하고 싶으신가요? AI와 함께 새로운 인사이트를 발견해보세요.
+            </p>
+
+            {/* Quick Actions */}
+            <div className="flex flex-wrap items-center gap-4">
+              <button
+                onClick={handleNewNotebook}
+                className="group/btn flex items-center gap-2 px-6 py-3.5 bg-brand text-white rounded-full font-semibold hover:bg-brand-hover shadow-lg shadow-brand/20 hover:shadow-brand/40 hover:-translate-y-0.5 transition-all w-full sm:w-auto justify-center"
+              >
+                <BookOpen className="w-[18px] h-[18px] group-hover/btn:scale-110 transition-transform" />
+                <span>새 노트북 만들기</span>
+              </button>
+              <button
+                onClick={handleNewNotebook}
+                className="group/btn flex items-center gap-2 px-6 py-3.5 bg-white/90 backdrop-blur-md text-text-primary rounded-full font-medium border border-border-default/80 hover:border-brand/30 hover:bg-white shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all w-full sm:w-auto justify-center"
+              >
+                <span className="text-lg leading-none">📄</span>
+                <span>PDF 문서를 원본으로 시작</span>
+              </button>
+            </div>
+          </div>
+        </section>
+
         <div className="flex items-center justify-between mb-8">
           <h2 className="text-2xl font-semibold tracking-tight text-text-primary">
-            최근 노트북
+            내 서재
           </h2>
         </div>
 
