@@ -55,7 +55,7 @@ export function SourcesPanel({ notebookId, autoOpenUpload }: SourcesPanelProps) 
   const enabledCount = sources.filter((s) => s.is_enabled).length;
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col overflow-hidden">
       {/* Header */}
       <div className="p-3 border-b border-border-default">
         <div className="flex items-center justify-between mb-3">
@@ -126,7 +126,7 @@ export function SourcesPanel({ notebookId, autoOpenUpload }: SourcesPanelProps) 
             {filteredSources.map((source) => (
               <div
                 key={source.id}
-                className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-gray-50 group cursor-pointer"
+                className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-gray-50 group cursor-pointer min-w-0"
                 onClick={() => setSelectedSource(source)}
               >
                 {source.processing_status === "completed" ? (
@@ -134,7 +134,7 @@ export function SourcesPanel({ notebookId, autoOpenUpload }: SourcesPanelProps) 
                 ) : (
                   <StatusIcon status={source.processing_status} />
                 )}
-                <span className="text-[13px] text-text-primary truncate flex-1">
+                <span className="text-[13px] text-text-primary truncate flex-1 w-0">
                   {source.title}
                 </span>
                 <Checkbox
