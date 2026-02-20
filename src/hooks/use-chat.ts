@@ -85,16 +85,37 @@ export function useSendMessage(notebookId: string) {
           setStreamingContent(fullContent);
         }
 
-        // Refresh chat messages after streaming is complete
-        queryClient.invalidateQueries({
-          queryKey: ["chat-messages", notebookId],
-        });
-      } catch (err) {
-        if (err instanceof DOMException && err.name === "AbortError") {
-          // Aborted by user — still refresh messages
+        // 스트리밍 완료: AI 응답을 캐시에 즉시 반영 (DB 저장 완료 전 사라지는 문제 방지)
+        const assistantMessage: ChatMessage = {
+          id: `temp-assistant-${Date.now()}`,
+          notebook_id: notebookId,
+          user_id: "",
+          role: "assistant",
+          content: fullContent,
+          citations: [],
+          model: null,
+          tokens_used: null,
+          created_at: new Date().toISOString(),
+        };
+        queryClient.setQueryData<ChatMessage[]>(
+          ["chat-messages", notebookId],
+          (old) => [...(old || []), assistantMessage]
+        );
+
+        // DB 저장 완료를 기다린 후 실제 데이터로 갱신
+        setTimeout(() => {
           queryClient.invalidateQueries({
             queryKey: ["chat-messages", notebookId],
           });
+        }, 2000);
+      } catch (err) {
+        if (err instanceof DOMException && err.name === "AbortError") {
+          // Aborted by user — still refresh messages
+          setTimeout(() => {
+            queryClient.invalidateQueries({
+              queryKey: ["chat-messages", notebookId],
+            });
+          }, 2000);
         } else {
           throw err;
         }
