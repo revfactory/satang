@@ -151,7 +151,7 @@ Layout:
 - "${title}" displayed prominently
 - ${content || "Thank you message"}
 - Clean, elegant design matching the cover slide style
-- Optional: contact info or QR code area at bottom`;
+- Do NOT include Q&A text or QR codes`;
     return format === "presenter"
       ? `${base}\n- Very minimal, focus on a memorable closing visual`
       : base;

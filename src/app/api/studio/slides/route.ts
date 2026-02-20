@@ -180,7 +180,7 @@ ${userThemePrompt
     {"type": "toc", "title": "목차", "content": "1. 섹션1\\n2. 섹션2\\n3. 섹션3"},
     {"type": "content", "title": "슬라이드 제목", "content": "핵심 내용 2-3줄"},
     {"type": "key_takeaway", "title": "핵심 정리", "content": "주요 포인트 요약"},
-    {"type": "closing", "title": "감사합니다", "content": "Q&A"}
+    {"type": "closing", "title": "감사합니다", "content": ""}
   ]
 }
 

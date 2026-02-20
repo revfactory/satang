@@ -9,10 +9,11 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Eye, ImageIcon } from "lucide-react";
+import { Loader2, Eye, ImageIcon, Trash2 } from "lucide-react";
 import {
   useCreateDesignTheme,
   useUpdateDesignTheme,
+  useDeleteDesignTheme,
   useGenerateThemePreview,
 } from "@/hooks/use-design-themes";
 import type { DesignThemeRow } from "@/lib/supabase/types";
@@ -35,10 +36,23 @@ export function ThemeEditorDialog({
 
   const createTheme = useCreateDesignTheme();
   const updateTheme = useUpdateDesignTheme();
+  const deleteTheme = useDeleteDesignTheme();
   const generatePreview = useGenerateThemePreview();
 
   const isEditing = !!theme;
   const isPending = createTheme.isPending || updateTheme.isPending;
+
+  const handleDelete = async () => {
+    if (!theme) return;
+    if (!confirm("이 테마를 삭제하시겠습니까?")) return;
+    try {
+      await deleteTheme.mutateAsync(theme.id);
+      toast.success("테마가 삭제되었습니다.");
+      onClose();
+    } catch {
+      toast.error("테마 삭제에 실패했습니다.");
+    }
+  };
 
   useEffect(() => {
     if (theme) {
@@ -182,23 +196,39 @@ export function ThemeEditorDialog({
 
           {/* Actions */}
           <div className="flex justify-between">
-            <Button
-              variant="outline"
-              onClick={handlePreview}
-              disabled={generatePreview.isPending || !prompt.trim()}
-            >
-              {generatePreview.isPending ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                  생성 중...
-                </>
-              ) : (
-                <>
-                  <Eye className="w-4 h-4 mr-2" />
-                  미리보기 생성
-                </>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={handlePreview}
+                disabled={generatePreview.isPending || !prompt.trim()}
+              >
+                {generatePreview.isPending ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                    생성 중...
+                  </>
+                ) : (
+                  <>
+                    <Eye className="w-4 h-4 mr-2" />
+                    미리보기 생성
+                  </>
+                )}
+              </Button>
+              {isEditing && (
+                <Button
+                  variant="outline"
+                  onClick={handleDelete}
+                  disabled={deleteTheme.isPending}
+                  className="text-error hover:bg-red-50 hover:border-error"
+                >
+                  {deleteTheme.isPending ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Trash2 className="w-4 h-4" />
+                  )}
+                </Button>
               )}
-            </Button>
+            </div>
             <div className="flex gap-2">
               <Button variant="outline" onClick={onClose}>
                 취소
