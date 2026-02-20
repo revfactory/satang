@@ -34,7 +34,7 @@
 └──────────────┬──────────────────────────────────────────────────┘
                ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│  Phase 2: 이미지 생성 (병렬, 동시실행 3개 제한)                         │
+│  Phase 2: 이미지 생성 (병렬, 동시실행 12개 제한)                        │
 │  ─ Model: gemini-3-pro-image-preview                            │
 │  ─ 각 슬라이드별 타입별 프롬프트 + 디자인 테마 적용                         │
 │  ─ 사용자 테마 프롬프트 우선, 없으면 Gemini 생성 테마 사용                  │
@@ -54,17 +54,22 @@
 | 파일 | 역할 |
 |------|------|
 | `src/app/api/studio/slides/route.ts` | 슬라이드 생성 API (메인 오케스트레이터) |
-| `src/app/api/studio/slides/pdf/route.ts` | PDF 내보내기 API |
+| `src/app/api/studio/slides/pdf/route.ts` | PDF 내보내기 API (병렬 이미지 다운로드) |
+| `src/app/api/studio/slides/pptx/route.ts` | PPTX 내보내기 API (병렬 이미지 다운로드) |
+| `src/app/api/studio/slides/regenerate/route.ts` | 개별 슬라이드 재생성 API |
 | `src/app/api/studio/theme-preview/route.ts` | 디자인 테마 미리보기 이미지 생성 API |
-| `src/lib/ai/nano-banana.ts` | 이미지 생성 함수 + 슬라이드 타입별 프롬프트 |
-| `src/lib/ai/gemini.ts` | Gemini 텍스트 생성 (아웃라인용) |
+| `src/app/api/chat/route.ts` | 채팅 API (스트리밍 + TransformStream DB 저장) |
+| `src/lib/ai/nano-banana.ts` | 이미지 생성/편집 함수 + 슬라이드 타입별 프롬프트 |
+| `src/lib/ai/gemini.ts` | Gemini 텍스트 생성 (아웃라인용, 채팅 스트리밍) |
 | `src/components/studio/slide-modal.tsx` | 생성 옵션 UI 모달 |
 | `src/components/studio/infographic-modal.tsx` | 인포그래픽 생성 모달 (테마 선택 포함) |
-| `src/components/studio/theme-selector.tsx` | 디자인 테마 선택 컴포넌트 (가로 스크롤 카드) |
-| `src/components/studio/content-viewer.tsx` | 슬라이드 뷰어 (캐러셀 + 진행률) |
+| `src/components/studio/theme-selector.tsx` | 디자인 테마 선택 컴포넌트 (가로 스크롤 카드 + 추가 버튼) |
+| `src/components/studio/content-viewer.tsx` | 슬라이드 뷰어 (캐러셀 + 진행률 + 재생성) |
 | `src/components/settings/theme-editor-dialog.tsx` | 디자인 테마 생성/수정 다이얼로그 |
+| `src/components/chat/chat-panel.tsx` | 채팅 패널 (마크다운 렌더링, 스트리밍 표시) |
 | `src/hooks/use-studio.ts` | React Query 뮤테이션 훅 |
 | `src/hooks/use-design-themes.ts` | 디자인 테마 CRUD 훅 |
+| `src/hooks/use-chat.ts` | 채팅 메시지 조회/전송 훅 |
 
 ### 사용 모델
 
@@ -110,7 +115,7 @@
 
 ### 2.4 슬라이드 수 (slideCount)
 
-- **입력 범위**: 1~20 (number input)
+- **입력 범위**: 1~50 (number input)
 - **비워두면**: 형식 × 깊이 조합에 따라 자동 계산
 
 **자동 슬라이드 수 결정 로직:**
@@ -128,7 +133,7 @@
 - **선택 UI**: `ThemeSelector` 컴포넌트 (가로 스크롤 썸네일 카드)
 - **기본값**: "자동" (null) — Gemini가 소스 내용에 맞는 테마를 자동 생성
 - **사용자 테마 선택 시**: `design_themes` 테이블에서 프롬프트를 조회하여 아웃라인 + 이미지 생성에 주입
-- **테마 없는 경우**: "자동" 카드 + "설정에서 테마 만들기" 링크 표시
+- **테마 추가**: 목록 끝 "+" 버튼으로 ThemeEditorDialog를 바로 열어 생성 가능
 
 **테마 적용 우선순위:**
 
@@ -314,7 +319,7 @@ export type SlideType = "cover" | "toc" | "section" | "content" | "key_takeaway"
 ### 5.1 병렬 실행 제어
 
 ```typescript
-const CONCURRENCY_LIMIT = 3;  // 최대 3개 동시 생성
+const CONCURRENCY_LIMIT = 12;  // 최대 12개 동시 생성
 
 async function runWithConcurrency<T>(
   tasks: (() => Promise<T>)[],
@@ -544,47 +549,106 @@ refetchInterval: (query) => {
 
 ---
 
-## 8. PDF 내보내기
+## 8. 내보내기 (PDF / PPTX)
 
-### 경로: `POST /api/studio/slides/pdf`
+### 8.1 PDF 내보내기
 
-### 입력
+**경로**: `POST /api/studio/slides/pdf`
 
+**입력:**
 ```typescript
 { imageUrls: string[], title: string }
 ```
 
-### 처리 로직
-
+**처리 로직:**
 1. `PDFDocument.create()` (pdf-lib)
-2. 각 이미지 URL을 fetch
-3. Content-Type 헤더 또는 매직 바이트로 이미지 타입 판별 (JPEG/PNG)
-4. A4 가로 (842 × 595pt) 페이지에 맞춰 비율 유지하며 중앙 배치
-5. 읽기 실패한 이미지는 건너뜀
-6. PDF 바이너리 응답 (Content-Disposition: attachment)
+2. **병렬 이미지 다운로드** (`Promise.allSettled`) — 모든 이미지를 동시에 fetch
+3. 순서를 유지하면서 성공한 이미지만 PDF에 삽입
+4. Content-Type 헤더 또는 매직 바이트로 이미지 타입 판별 (JPEG/PNG)
+5. A4 가로 (842 × 595pt) 페이지에 맞춰 비율 유지하며 중앙 배치
+6. 실패한 이미지는 건너뜀 (로그 출력)
+7. PDF 바이너리 응답 (Content-Disposition: attachment)
+
+### 8.2 PPTX 내보내기
+
+**경로**: `POST /api/studio/slides/pptx`
+
+**입력:**
+```typescript
+{ imageUrls: string[], title: string }
+```
+
+**처리 로직:**
+1. `new PptxGenJS()` — 16:9 (LAYOUT_WIDE) 레이아웃
+2. **병렬 이미지 다운로드** (`Promise.allSettled`) — base64 data URI로 변환
+3. 순서를 유지하면서 성공한 이미지만 슬라이드에 추가
+4. 각 이미지를 슬라이드 전체 크기(`w: "100%", h: "100%"`)로 삽입
+5. `pptx.write({ outputType: "nodebuffer" })` 로 바이너리 생성
+6. PPTX 바이너리 응답 (Content-Disposition: attachment)
 
 ---
 
-## 9. UI 컴포넌트
+## 9. 개별 슬라이드 재생성
 
-### 9.1 SlideModal (생성 옵션)
+### 경로: `POST /api/studio/slides/regenerate`
+
+### 입력
+
+```typescript
+{ outputId: string, slideIndex: number, prompt: string }
+```
+
+### 처리 흐름
+
+1. 기존 `studio_outputs` 레코드에서 슬라이드 아웃라인, 디자인 테마, 설정 조회
+2. `settings.designThemeId`로 `design_themes` 테이블에서 `userThemePrompt` 조회
+3. 기존 이미지 URL이 있으면 → **이미지 편집 모드** (`editSlideImage`)
+4. 기존 이미지 없거나 다운로드 실패 시 → **새로 생성** (`generateSlideImage`)
+5. 새 이미지를 Supabase Storage에 업로드
+6. `image_urls` 배열의 해당 인덱스만 교체
+
+### editSlideImage vs generateSlideImage
+
+| 항목 | `editSlideImage` | `generateSlideImage` |
+|------|-------------------|----------------------|
+| 입력 | 기존 이미지 + 편집 프롬프트 | 슬라이드 정보만 |
+| Gemini 호출 | 이미지 + 텍스트 (멀티모달) | 텍스트만 |
+| 프롬프트 | "Edit this slide... Edit instructions: {prompt}" | "Create slide N of M..." |
+| `userThemePrompt` | 지원 (동일 우선순위) | 지원 (동일 우선순위) |
+| `designTheme` | 지원 | 지원 |
+
+### 테마 적용 우선순위 (generateSlideImage과 동일)
+
+```typescript
+const themeInstructions = userThemePrompt
+  ? `Design Theme (apply consistently):\n${userThemePrompt}\n`
+  : designTheme
+  ? `Design Theme (apply consistently):\n- Primary color: ...\n- Mood: ...\n- Style: ...\n`
+  : "";
+```
+
+---
+
+## 10. UI 컴포넌트
+
+### 10.1 SlideModal (생성 옵션)
 
 - **형식**: 2열 카드 라디오 (detailed / presenter)
 - **언어**: 드롭다운 셀렉트 (7개 언어)
 - **깊이**: 토글 버튼 (짧게 / 기본값)
-- **슬라이드 수**: 숫자 입력 (1~20, 비워두면 자동)
+- **슬라이드 수**: 숫자 입력 (1~50, 비워두면 자동)
 - **디자인 테마**: ThemeSelector (가로 스크롤 카드, "자동" 기본값)
 - **콘텐츠 설명**: 텍스트 영역 (리사이즈 가능)
 - **생성 버튼**: 로딩 스피너 표시
 
-### 9.2 ThemeSelector (테마 선택)
+### 10.2 ThemeSelector (테마 선택)
 
 - **"자동" 카드**: Sparkles 아이콘 + "자동" 라벨, 기본 선택
 - **테마 카드**: 썸네일 이미지 배경 + 하단 이름 오버레이
+- **"+ 테마 추가" 카드**: 점선 테두리 버튼, 클릭 시 ThemeEditorDialog 인라인 열림 (설정 페이지 이동 불필요)
 - **가로 스크롤**: `overflow-hidden` 래퍼 > `flex-nowrap overflow-x-auto` 컨테이너
-- **테마 없을 때**: "설정에서 테마 만들기" 링크
 
-### 9.3 ThemeEditorDialog (테마 에디터)
+### 10.3 ThemeEditorDialog (테마 에디터)
 
 - **미리보기 영역**: 16:9 비율, 생성 전 placeholder / 생성 후 이미지
 - **테마 이름**: 텍스트 입력
@@ -592,7 +656,7 @@ refetchInterval: (query) => {
 - **미리보기 생성 버튼**: 프롬프트 기반 샘플 슬라이드 생성
 - **등록/수정 버튼**: 미리보기 없으면 비활성화
 
-### 9.4 ContentViewer (뷰어)
+### 10.4 ContentViewer (뷰어)
 
 **생성 중 표시:**
 - 스피너 애니메이션
@@ -605,13 +669,74 @@ refetchInterval: (query) => {
 - 좌/우 네비게이션 버튼
 - 하단 dot 인디케이터 (슬라이드 위치)
 - 이미지 저장 버튼 (개별 슬라이드)
-- PDF 다운로드 버튼
+- 개별 슬라이드 재생성 (프롬프트 입력 → regenerate API)
+- PDF / PPTX 다운로드 버튼
+
+### 10.5 ChatPanel (채팅)
+
+- **메시지 표시**: 사용자 메시지 (우측 말풍선), AI 응답 (좌측 마크다운)
+- **스트리밍**: SSE 기반 실시간 타이핑 효과
+- **빈 상태**: 추천 질문 3개 표시
+- **AI 응답 액션**: 복사, 메모 저장, 좋아요/싫어요
+- **중단 기능**: 스트리밍 중 AbortController로 취소
 
 ---
 
-## 10. DB 스키마
+## 11. 채팅 시스템
 
-### 10.1 studio_outputs (슬라이드)
+### 11.1 아키텍처
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│  ChatPanel (클라이언트)                                        │
+│  1. 사용자 메시지 → 낙관적 업데이트 (캐시에 즉시 추가)                │
+│  2. POST /api/chat → SSE 스트리밍 수신                         │
+│  3. 스트리밍 완료 → AI 응답을 캐시에 즉시 반영                      │
+│  4. invalidateQueries로 DB 데이터로 교체                        │
+└──────────────┬───────────────────────────────────────────────┘
+               │
+               ▼
+┌──────────────────────────────────────────────────────────────┐
+│  API Route (/api/chat)                                       │
+│  1. 사용자 메시지 DB 저장                                       │
+│  2. 활성 소스 + 대화 이력 조회                                    │
+│  3. Gemini 스트리밍 응답 생성                                    │
+│  4. TransformStream으로 클라이언트 전송 + 내용 수집                │
+│  5. flush()에서 assistant 메시지 DB 저장 (스트림 종료 전 보장)       │
+└──────────────────────────────────────────────────────────────┘
+```
+
+### 11.2 DB 저장 방식 (TransformStream)
+
+```typescript
+const passthrough = new TransformStream<Uint8Array, Uint8Array>({
+  transform(chunk, controller) {
+    fullContent += decoder.decode(chunk, { stream: true });
+    controller.enqueue(chunk);  // 클라이언트에 그대로 전달
+  },
+  async flush() {
+    // 스트림 종료 직전에 DB 저장 — 함수 종료 전 반드시 실행
+    await supabase.from("chat_messages").insert({ ... });
+  },
+});
+return new Response(stream.pipeThrough(passthrough), { ... });
+```
+
+- `flush()`는 스트림이 닫히기 전에 실행되므로 Vercel serverless에서도 DB 저장이 보장됨
+- 클라이언트가 `done: true`를 받는 시점에 이미 DB 저장 완료
+
+### 11.3 클라이언트 캐시 전략
+
+1. **사용자 메시지**: 낙관적 업데이트 (temp ID로 캐시에 즉시 추가)
+2. **AI 응답 스트리밍**: `streamingContent` state로 실시간 표시
+3. **스트리밍 완료**: AI 응답을 `ChatMessage`로 캐시에 즉시 추가 (사라짐 방지)
+4. **DB 갱신**: `invalidateQueries`로 실제 DB 데이터로 교체 (temp ID → 실제 ID)
+
+---
+
+## 12. DB 스키마
+
+### 12.1 studio_outputs (슬라이드)
 
 ```typescript
 {
@@ -646,7 +771,7 @@ refetchInterval: (query) => {
 }
 ```
 
-### 10.2 design_themes
+### 12.2 design_themes
 
 ```typescript
 {
@@ -663,7 +788,25 @@ refetchInterval: (query) => {
 
 ---
 
-## 11. 에러 처리 총정리
+### 12.3 chat_messages
+
+```typescript
+{
+  id: string;
+  notebook_id: string;
+  user_id: string;
+  role: "user" | "assistant";
+  content: string;
+  citations: unknown[];
+  model: string | null;         // "gemini-3-flash-preview" (assistant만)
+  tokens_used: number | null;
+  created_at: string;
+}
+```
+
+---
+
+## 13. 에러 처리 총정리
 
 | 상황 | 처리 |
 |------|------|
@@ -677,15 +820,19 @@ refetchInterval: (query) => {
 | PDF 내 이미지 읽기 실패 | 해당 이미지 건너뜀 |
 | designThemeId 해당 테마 없음 | userThemePrompt = undefined, 자동 모드로 폴백 |
 | 테마 미리보기 생성 실패 | 500 "미리보기 생성 실패" |
+| PPTX 이미지 fetch 실패 | 해당 이미지 건너뜀 (로그 출력) |
+| 슬라이드 재생성 시 기존 이미지 다운로드 실패 | generateSlideImage로 폴백 (새로 생성) |
+| 채팅 스트리밍 중 사용자 중단 | AbortController로 취소, DB에 부분 저장 |
 
 ---
 
-## 12. 의존성
+## 14. 의존성
 
 ```json
 {
-  "@google/genai": "^1.40.0",       // Gemini API 클라이언트
-  "pdf-lib": "^1.17.1",             // PDF 생성 (슬라이드 PDF)
+  "@google/genai": "^1.40.0",        // Gemini API 클라이언트
+  "pdf-lib": "^1.17.1",              // PDF 생성 (슬라이드 PDF)
+  "pptxgenjs": "^3.12.0",            // PPTX 생성 (슬라이드 PPTX)
   "@supabase/supabase-js": "^2.95.2" // DB + Storage
 }
 ```
