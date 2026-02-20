@@ -34,34 +34,34 @@ import Link from "next/link";
 
 const CARD_THEMES = [
   {
-    bg: "bg-gradient-to-br from-[#7C3AED] to-[#DB2777]", // Violet to Pink
-    borderGlow: "group-hover:ring-[#DB2777]/50",
-    shadowGlow: "hover:shadow-[#7C3AED]/30",
+    bg: "bg-gradient-to-br from-[#7BC67E] to-[#F6E27A]", // 메로나 (연초록→바닐라)
+    borderGlow: "group-hover:ring-[#7BC67E]/40",
+    shadowGlow: "hover:shadow-[#7BC67E]/25",
   },
   {
-    bg: "bg-gradient-to-br from-[#2563EB] to-[#06B6D4]", // Blue to Cyan
-    borderGlow: "group-hover:ring-[#06B6D4]/50",
-    shadowGlow: "hover:shadow-[#2563EB]/30",
+    bg: "bg-gradient-to-br from-[#F4A7BB] to-[#FDDDE6]", // 딸기우유 (딸기핑크→크림)
+    borderGlow: "group-hover:ring-[#F4A7BB]/40",
+    shadowGlow: "hover:shadow-[#F4A7BB]/25",
   },
   {
-    bg: "bg-gradient-to-br from-[#F59E0B] to-[#EF4444]", // Amber to Red
-    borderGlow: "group-hover:ring-[#EF4444]/50",
-    shadowGlow: "hover:shadow-[#F59E0B]/30",
+    bg: "bg-gradient-to-br from-[#FDE68A] to-[#FCA5A5]", // 레몬에이드 (레몬→피치)
+    borderGlow: "group-hover:ring-[#FDE68A]/40",
+    shadowGlow: "hover:shadow-[#FDE68A]/25",
   },
   {
-    bg: "bg-gradient-to-br from-[#10B981] to-[#3B82F6]", // Emerald to Blue
-    borderGlow: "group-hover:ring-[#3B82F6]/50",
-    shadowGlow: "hover:shadow-[#10B981]/30",
+    bg: "bg-gradient-to-br from-[#A78BFA] to-[#F0ABFC]", // 포도캔디 (라벤더→라일락)
+    borderGlow: "group-hover:ring-[#A78BFA]/40",
+    shadowGlow: "hover:shadow-[#A78BFA]/25",
   },
   {
-    bg: "bg-gradient-to-br from-[#8B5CF6] to-[#6366F1]", // Purple to Indigo
-    borderGlow: "group-hover:ring-[#6366F1]/50",
-    shadowGlow: "hover:shadow-[#8B5CF6]/30",
+    bg: "bg-gradient-to-br from-[#93C5FD] to-[#C4B5FD]", // 소다캔디 (스카이→퍼플)
+    borderGlow: "group-hover:ring-[#93C5FD]/40",
+    shadowGlow: "hover:shadow-[#93C5FD]/25",
   },
   {
-    bg: "bg-gradient-to-br from-[#EC4899] to-[#F43F5E]", // Pink to Rose
-    borderGlow: "group-hover:ring-[#F43F5E]/50",
-    shadowGlow: "hover:shadow-[#EC4899]/30",
+    bg: "bg-gradient-to-br from-[#FDBA74] to-[#FCA5A5]", // 살구젤리 (살구→코랄)
+    borderGlow: "group-hover:ring-[#FDBA74]/40",
+    shadowGlow: "hover:shadow-[#FDBA74]/25",
   },
 ];
 
@@ -99,14 +99,14 @@ export function NotebookCard({
     <>
       <Link
         href={`/notebook/${notebook.id}`}
-        className={`group relative flex flex-col h-[160px] p-5 rounded-[24px] ${theme.bg} text-white shadow-lg ${theme.shadowGlow} card-glow-hover transition-shadow duration-500 ease-out overflow-hidden cursor-pointer`}
+        className={`group relative flex flex-col h-[160px] p-5 rounded-[24px] ${theme.bg} shadow-lg ${theme.shadowGlow} card-glow-hover transition-shadow duration-500 ease-out overflow-hidden cursor-pointer`}
       >
         {/* Shine Sweep Animation on Hover */}
         <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12 z-0 pointer-events-none" />
 
         {/* Decorative inner glow blobs */}
         <div className="absolute -top-12 -right-12 w-40 h-40 bg-white/20 rounded-full blur-3xl group-hover:scale-150 group-hover:bg-white/30 transition-all duration-700 z-0 pointer-events-none" />
-        <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-black/10 rounded-full blur-2xl group-hover:scale-150 transition-all duration-700 z-0 pointer-events-none" />
+        <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-black/15 rounded-full blur-2xl group-hover:scale-150 transition-all duration-700 z-0 pointer-events-none" />
 
         {/* Border sweep glow */}
         <div className="border-sweep">
@@ -119,7 +119,7 @@ export function NotebookCard({
             <DropdownMenuTrigger asChild>
               <button
                 onClick={(e) => e.preventDefault()}
-                className="p-1.5 rounded-full bg-black/20 hover:bg-black/40 backdrop-blur-md text-white shadow-sm transition-all cursor-pointer"
+                className="p-1.5 rounded-full bg-black/10 hover:bg-black/20 backdrop-blur-md text-gray-700 shadow-sm transition-all cursor-pointer"
               >
                 <MoreVertical className="w-[18px] h-[18px]" />
               </button>
@@ -154,17 +154,17 @@ export function NotebookCard({
 
         {/* Content Group */}
         <div className="relative z-10 w-full">
-          <h3 className="text-[17px] font-bold text-white line-clamp-2 leading-snug drop-shadow-md group-hover:drop-shadow-lg transition-all">
+          <h3 className="text-[17px] font-bold text-gray-900 line-clamp-2 leading-snug transition-all">
             {notebook.title}
           </h3>
 
           <div className="flex flex-col gap-1.5 mt-3">
-            <div className="flex items-center gap-2 text-[12px] font-medium text-white/80 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-400">
-              <span className="drop-shadow-sm">생성일: {createdAt}</span>
-              <span className="opacity-90 drop-shadow-sm ml-auto">{timeAgo}</span>
+            <div className="flex items-center gap-2 text-[12px] font-medium text-gray-700/80 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-400">
+              <span>생성일: {createdAt}</span>
+              <span className="ml-auto">{timeAgo}</span>
             </div>
-            <div className="flex items-center gap-2 text-[12px] font-semibold text-white/90 mt-1">
-              <span className="bg-black/20 backdrop-blur-md px-2.5 py-1 rounded-lg border border-white/10 shadow-sm">
+            <div className="flex items-center gap-2 text-[12px] font-semibold text-gray-800 mt-1">
+              <span className="bg-white/50 backdrop-blur-md px-2.5 py-1 rounded-lg border border-white/60 shadow-sm">
                 소스 {notebook.source_count}개
               </span>
             </div>

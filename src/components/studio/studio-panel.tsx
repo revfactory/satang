@@ -38,15 +38,15 @@ import { formatDistanceToNow } from "date-fns";
 import { ko } from "date-fns/locale";
 
 const STUDIO_TILES = [
-  { type: "mind_map", label: "마인드맵", icon: Brain, gradient: "from-[#8B5CF6] to-[#EC4899]", enabled: true },
-  { type: "report", label: "보고서", icon: FileText, gradient: "from-[#EC4899] to-[#F43F5E]", enabled: true },
-  { type: "flashcard", label: "플래시카드", icon: CreditCard, gradient: "from-[#10B981] to-[#06B6D4]", enabled: true },
-  { type: "quiz", label: "퀴즈", icon: HelpCircle, gradient: "from-[#06B6D4] to-[#3B82F6]", enabled: true },
-  { type: "infographic", label: "인포그래픽", icon: BarChart3, gradient: "from-[#F59E0B] to-[#EF4444]", enabled: true },
-  { type: "slide_deck", label: "슬라이드 자료", icon: Presentation, gradient: "from-[#2563EB] to-[#7C3AED]", enabled: true },
-  { type: "audio_overview", label: "AI 오디오 오버뷰", icon: Headphones, gradient: "from-[#64748B] to-[#94A3B8]", enabled: false },
-  { type: "video_overview", label: "동영상 개요", icon: Video, gradient: "from-[#64748B] to-[#94A3B8]", enabled: false },
-  { type: "data_table", label: "데이터 표", icon: Table, gradient: "from-[#64748B] to-[#94A3B8]", enabled: false, fullWidth: true },
+  { type: "mind_map", label: "마인드맵", icon: Brain, gradient: "from-[#A78BFA] to-[#F0ABFC]", enabled: true },        // 포도캔디
+  { type: "report", label: "보고서", icon: FileText, gradient: "from-[#F4A7BB] to-[#FDDDE6]", enabled: true },          // 딸기우유
+  { type: "flashcard", label: "플래시카드", icon: CreditCard, gradient: "from-[#7BC67E] to-[#F6E27A]", enabled: true },  // 메로나
+  { type: "quiz", label: "퀴즈", icon: HelpCircle, gradient: "from-[#93C5FD] to-[#C4B5FD]", enabled: true },            // 소다캔디
+  { type: "infographic", label: "인포그래픽", icon: BarChart3, gradient: "from-[#FDE68A] to-[#FCA5A5]", enabled: true }, // 레몬에이드
+  { type: "slide_deck", label: "슬라이드 자료", icon: Presentation, gradient: "from-[#FDBA74] to-[#FCA5A5]", enabled: true }, // 살구젤리
+  { type: "audio_overview", label: "AI 오디오 오버뷰", icon: Headphones, gradient: "from-[#D1D5DB] to-[#E5E7EB]", enabled: false },
+  { type: "video_overview", label: "동영상 개요", icon: Video, gradient: "from-[#D1D5DB] to-[#E5E7EB]", enabled: false },
+  { type: "data_table", label: "데이터 표", icon: Table, gradient: "from-[#D1D5DB] to-[#E5E7EB]", enabled: false, fullWidth: true },
 ] as const;
 
 const OUTPUT_ICONS: Record<string, React.ReactNode> = {
@@ -161,12 +161,12 @@ export function StudioPanel({ notebookId }: StudioPanelProps) {
                     {tile.enabled && (
                       <div className="absolute -top-3 -right-3 w-12 h-12 bg-white/20 rounded-full blur-2xl transition-transform duration-500 group-hover:scale-150" />
                     )}
-                    <Icon className="w-4 h-4 text-white/90 shrink-0 relative z-10" />
-                    <span className="text-xs font-medium text-white truncate relative z-10">
+                    <Icon className="w-4 h-4 text-gray-700 shrink-0 relative z-10" />
+                    <span className="text-xs font-medium text-gray-800 truncate relative z-10">
                       {tile.label}
                     </span>
                     {tile.enabled && (
-                      <Pencil className="w-3 h-3 text-white/60 opacity-0 group-hover:opacity-100 transition-opacity ml-auto shrink-0 relative z-10" />
+                      <Pencil className="w-3 h-3 text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity ml-auto shrink-0 relative z-10" />
                     )}
                   </button>
                 </div>
