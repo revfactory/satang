@@ -78,7 +78,7 @@ export function InfographicModal({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[520px]">
+      <DialogContent className="sm:max-w-[520px] max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-base font-semibold">
             <BarChart3 className="w-5 h-5" />
@@ -86,7 +86,7 @@ export function InfographicModal({
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-5 min-w-0">
+        <div className="space-y-5 min-w-0 overflow-y-auto flex-1 pr-1">
           {/* Language */}
           <div>
             <label className="text-[13px] font-medium text-text-secondary block mb-2">
@@ -170,23 +170,24 @@ export function InfographicModal({
             />
           </div>
 
-          {/* Submit */}
-          <div className="flex justify-end">
-            <Button
-              onClick={handleGenerate}
-              disabled={generate.isPending}
-              className="bg-brand hover:bg-brand-hover px-6"
-            >
-              {generate.isPending ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                  생성 중...
-                </>
-              ) : (
-                "생성"
-              )}
-            </Button>
-          </div>
+        </div>
+
+        {/* Submit - fixed at bottom */}
+        <div className="flex justify-end pt-4 border-t border-border-default shrink-0">
+          <Button
+            onClick={handleGenerate}
+            disabled={generate.isPending}
+            className="bg-brand hover:bg-brand-hover px-6"
+          >
+            {generate.isPending ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                생성 중...
+              </>
+            ) : (
+              "생성"
+            )}
+          </Button>
         </div>
       </DialogContent>
     </Dialog>
