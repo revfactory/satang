@@ -673,10 +673,10 @@ export function ContentViewer({ output, onClose }: ContentViewerProps) {
                   {!regenOpen ? (
                     <button
                       onClick={() => setRegenOpen(true)}
-                      className="flex items-center gap-1.5 mx-auto text-xs text-text-muted hover:text-text-secondary transition-colors cursor-pointer"
+                      className="flex items-center gap-1.5 mx-auto text-sm font-medium text-text-secondary hover:text-brand transition-colors cursor-pointer"
                     >
-                      <RefreshCw className="w-3.5 h-3.5" />
-                      이 슬라이드 재생성
+                      <RefreshCw className="w-4 h-4" />
+                      슬라이드 수정하기
                     </button>
                   ) : (
                     <div className="flex items-center gap-2 px-1">
