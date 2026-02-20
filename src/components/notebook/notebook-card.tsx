@@ -74,17 +74,19 @@ export function NotebookCard({
     <>
       <Link
         href={`/notebook/${notebook.id}`}
-        className={`${bgColor} rounded-xl h-40 p-4 flex flex-col cursor-pointer group relative hover:shadow-[var(--shadow-card-hover)] hover:-translate-y-0.5 transition-all duration-200`}
+        className={`group relative flex flex-col h-[200px] p-6 rounded-2xl ${bgColor} bg-opacity-40 backdrop-blur-md border border-white/60 shadow-sm hover:shadow-card-hover hover:-translate-y-1.5 transition-all duration-400 ease-out overflow-hidden`}
       >
+        {/* Decorative background glow */}
+        <div className="absolute -top-10 -right-10 w-32 h-32 bg-white/40 rounded-full blur-2xl group-hover:bg-white/60 transition-colors" />
         {/* Menu */}
-        <div className="absolute top-2 right-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+        <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
                 onClick={(e) => e.preventDefault()}
-                className="p-1 rounded-md hover:bg-black/5 cursor-pointer"
+                className="p-2 rounded-full bg-white/50 hover:bg-white/80 backdrop-blur-sm text-text-tertiary hover:text-text-primary shadow-sm ring-1 ring-black/5 transition-all cursor-pointer"
               >
-                <MoreVertical className="w-4 h-4 text-text-tertiary" />
+                <MoreVertical className="w-4 h-4" />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
@@ -113,21 +115,26 @@ export function NotebookCard({
           </DropdownMenu>
         </div>
 
-        {/* Emoji */}
-        <span className="text-[32px] leading-none">{notebook.emoji}</span>
-
-        {/* Title */}
-        <h3 className="text-sm font-semibold text-text-primary mt-3 line-clamp-2">
-          {notebook.title}
-        </h3>
+        {/* Emoji Container */}
+        <div className="w-14 h-14 bg-white/60 rounded-2xl flex items-center justify-center shadow-sm border border-white/80 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
+          <span className="text-[28px] leading-none drop-shadow-sm">{notebook.emoji}</span>
+        </div>
 
         <div className="flex-1" />
 
-        {/* Meta */}
-        <div className="flex items-center gap-2 text-xs text-text-muted">
-          <span>{timeAgo}</span>
-          <span>·</span>
-          <span>소스 {notebook.source_count}개</span>
+        {/* Content Group */}
+        <div className="mt-4 relative z-10">
+          <h3 className="text-lg font-bold text-text-primary line-clamp-2 leading-snug group-hover:text-brand transition-colors">
+            {notebook.title}
+          </h3>
+
+          <div className="flex items-center gap-2 mt-3 text-[13px] font-medium text-text-muted">
+            <span className="bg-white/60 px-2 py-0.5 rounded-md border border-white/40 backdrop-blur-sm shadow-sm">
+              소스 {notebook.source_count}
+            </span>
+            <span className="text-text-tertiary/40">•</span>
+            <span>{timeAgo}</span>
+          </div>
         </div>
       </Link>
 

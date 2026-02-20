@@ -2,48 +2,51 @@
 @plugin "@tailwindcss/typography";
 
 @theme {
-  --color-brand: #6D28D9;
-  --color-brand-hover: #5B21B6;
-  --color-brand-active: #4C1D95;
-  --color-brand-light: #EDE9FE;
-  --color-brand-faint: #FAF5FF;
+  --color-brand: #6366F1; /* Soft Indigo */
+  --color-brand-hover: #4F46E5;
+  --color-brand-active: #4338CA;
+  --color-brand-light: #EEF2FF;
+  --color-brand-faint: #F8FAFC;
 
-  --color-card-mint: #F0FDF4;
-  --color-card-amber: #FEF3C7;
-  --color-card-lavender: #EDE9FE;
-  --color-card-sky: #DBEAFE;
-  --color-card-emerald: #DCFCE7;
-  --color-card-rose: #F3E8FF;
+  --color-card-mint: #ECFDF5;
+  --color-card-amber: #FFFBEB;
+  --color-card-lavender: #F3E8FF;
+  --color-card-sky: #F0F9FF;
+  --color-card-emerald: #ECFDF5;
+  --color-card-rose: #FFF1F2;
 
-  --color-success: #059669;
-  --color-warning: #D97706;
-  --color-error: #DC2626;
-  --color-info: #2563EB;
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --color-error: #EF4444;
+  --color-info: #3B82F6;
 
-  --color-border-default: #E5E7EB;
-  --color-border-hover: #9CA3AF;
-  --color-border-focus: #6D28D9;
-  --color-border-dashed: #D1D5DB;
+  --color-border-default: #E2E8F0;
+  --color-border-hover: #CBD5E1;
+  --color-border-focus: #6366F1;
+  --color-border-dashed: #CBD5E1;
 
-  --color-text-primary: #1F2937;
-  --color-text-secondary: #374151;
-  --color-text-tertiary: #6B7280;
-  --color-text-muted: #9CA3AF;
+  --color-text-primary: #0F172A;
+  --color-text-secondary: #475569;
+  --color-text-tertiary: #64748B;
+  --color-text-muted: #94A3B8;
 
-  --font-sans: "Pretendard Variable", "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    sans-serif;
+  --color-background: #F8FAFC;
+  --color-background-glass: rgba(255, 255, 255, 0.75);
+
+  --font-sans: "Pretendard Variable", "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-mono: "JetBrains Mono", "Fira Code", monospace;
 
-  --radius-sm: 6px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
 
-  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.1);
-  --shadow-card-hover: 0 4px 12px rgba(0, 0, 0, 0.1);
-  --shadow-dropdown: 0 4px 16px rgba(0, 0, 0, 0.12);
-  --shadow-modal: 0 8px 32px rgba(0, 0, 0, 0.16);
-  --shadow-toast: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.05);
+  --shadow-card-hover: 0 10px 30px rgba(99, 102, 241, 0.1);
+  --shadow-dropdown: 0 10px 40px rgba(0, 0, 0, 0.08);
+  --shadow-modal: 0 20px 60px rgba(0, 0, 0, 0.12);
+  --shadow-toast: 0 8px 30px rgba(0, 0, 0, 0.1);
+  --shadow-glass: inset 0 0 0 1px rgba(255, 255, 255, 0.5);
 }
 
 body {

@@ -72,7 +72,7 @@ export function HomeClient({ user }: HomeClientProps) {
     });
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background text-text-primary">
       <HomeNav
         user={user}
         activeTab={activeTab}
@@ -84,34 +84,37 @@ export function HomeClient({ user }: HomeClientProps) {
         onSearchChange={setSearchQuery}
       />
 
-      <main className="max-w-[1280px] mx-auto px-6 py-6">
-        <h2 className="text-xl font-semibold text-text-primary mb-6">
-          최근 노트북
-        </h2>
+      <main className="max-w-[1440px] mx-auto px-6 sm:px-8 py-10 fade-in">
+        <div className="flex items-center justify-between mb-8">
+          <h2 className="text-2xl font-semibold tracking-tight text-text-primary">
+            최근 노트북
+          </h2>
+        </div>
 
         {isLoading ? (
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-4">
-            {Array.from({ length: 6 }).map((_, i) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+            {Array.from({ length: 10 }).map((_, i) => (
               <div
                 key={i}
-                className="rounded-xl h-40 bg-gray-100 animate-pulse"
+                className="rounded-xl h-[200px] bg-slate-100 animate-pulse ring-1 ring-border-default/50"
               />
             ))}
           </div>
         ) : !filteredNotebooks?.length ? (
-          <div className="flex flex-col items-center justify-center mt-32">
-            <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-              <BookOpen className="w-12 h-12 text-text-muted" />
+          <div className="flex flex-col items-center justify-center mt-20 sm:mt-32 p-12 bg-white/50 backdrop-blur-sm rounded-3xl border border-white/80 shadow-card">
+            <div className="relative w-28 h-28 bg-gradient-to-tr from-brand-faint to-card-lavender/50 rounded-full flex items-center justify-center mb-6 shadow-sm group">
+              <div className="absolute inset-0 bg-brand/5 rounded-full animate-ping opacity-75" style={{ animationDuration: '3s' }} />
+              <BookOpen className="w-12 h-12 text-brand drop-shadow-sm group-hover:scale-110 transition-transform duration-500" />
             </div>
-            <h3 className="text-lg font-semibold text-text-secondary">
-              노트북을 만들어 시작하세요
+            <h3 className="text-xl font-bold text-text-primary">
+              새로운 지식 여정을 시작하세요
             </h3>
-            <p className="text-sm text-text-muted mt-2">
-              소스를 추가하고 AI와 함께 학습하세요
+            <p className="text-[15px] text-text-muted mt-3 mb-8 text-center max-w-[300px] leading-relaxed">
+              PDF나 문서를 업로드하고 AI의 도움을 받아 정보를 학습하고 슬라이드를 만드세요
             </p>
             <button
               onClick={handleNewNotebook}
-              className="mt-6 px-6 py-2.5 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-hover transition-colors cursor-pointer"
+              className="px-8 py-3.5 bg-brand text-white rounded-full text-sm font-semibold hover:bg-brand-hover shadow-lg shadow-brand/20 hover:shadow-brand/40 hover:-translate-y-1 transition-all cursor-pointer"
             >
               새 노트북 만들기
             </button>
@@ -120,8 +123,8 @@ export function HomeClient({ user }: HomeClientProps) {
           <div
             className={
               viewMode === "grid"
-                ? "grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-4"
-                : "flex flex-col gap-2"
+                ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6"
+                : "flex flex-col gap-3"
             }
           >
             {viewMode === "grid" && (
@@ -139,15 +142,17 @@ export function HomeClient({ user }: HomeClientProps) {
                 <Link
                   key={notebook.id}
                   href={`/notebook/${notebook.id}`}
-                  className="flex items-center gap-3 h-12 px-4 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="group flex items-center gap-4 h-16 px-5 rounded-2xl bg-white border border-border-default hover:border-brand/30 hover:shadow-card-hover transition-all duration-300"
                 >
-                  <span className="text-lg">{notebook.emoji}</span>
-                  <span className="text-sm font-medium text-text-primary flex-1 truncate">
+                  <span className="text-2xl group-hover:scale-110 transition-transform">{notebook.emoji}</span>
+                  <span className="text-[15px] font-semibold text-text-primary flex-1 truncate group-hover:text-brand transition-colors">
                     {notebook.title}
                   </span>
-                  <span className="text-xs text-text-muted">
-                    소스 {notebook.source_count}개
-                  </span>
+                  <div className="flex items-center gap-2 bg-slate-50 px-3 py-1 rounded-full border border-border-default/50">
+                    <span className="text-xs font-medium text-text-secondary">
+                      소스 {notebook.source_count}
+                    </span>
+                  </div>
                 </Link>
               )
             )}
