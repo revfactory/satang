@@ -44,9 +44,9 @@ const CARD_THEMES = [
     shadowGlow: "hover:shadow-[#F4A7BB]/25",
   },
   {
-    bg: "bg-gradient-to-br from-[#FDE68A] to-[#FCA5A5]", // 레몬에이드 (레몬→피치)
-    borderGlow: "group-hover:ring-[#FDE68A]/40",
-    shadowGlow: "hover:shadow-[#FDE68A]/25",
+    bg: "bg-gradient-to-br from-[#FCA5A5] to-[#FDE68A]", // 레몬에이드 (레몬→피치)
+    borderGlow: "group-hover:ring-[#FCA5A5]/40",
+    shadowGlow: "hover:shadow-[#FCA5A5]/25",
   },
   {
     bg: "bg-gradient-to-br from-[#A78BFA] to-[#F0ABFC]", // 포도캔디 (라벤더→라일락)

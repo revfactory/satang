@@ -42,7 +42,7 @@ const STUDIO_TILES = [
   { type: "report", label: "보고서", icon: FileText, gradient: "from-[#F4A7BB] to-[#FDDDE6]", enabled: true },          // 딸기우유
   { type: "flashcard", label: "플래시카드", icon: CreditCard, gradient: "from-[#7BC67E] to-[#F6E27A]", enabled: true },  // 메로나
   { type: "quiz", label: "퀴즈", icon: HelpCircle, gradient: "from-[#93C5FD] to-[#C4B5FD]", enabled: true },            // 소다캔디
-  { type: "infographic", label: "인포그래픽", icon: BarChart3, gradient: "from-[#FDE68A] to-[#FCA5A5]", enabled: true }, // 레몬에이드
+  { type: "infographic", label: "인포그래픽", icon: BarChart3, gradient: "from-[#FCA5A5] to-[#FDE68A]", enabled: true }, // 레몬에이드
   { type: "slide_deck", label: "슬라이드 자료", icon: Presentation, gradient: "from-[#FDBA74] to-[#FCA5A5]", enabled: true }, // 살구젤리
   { type: "audio_overview", label: "AI 오디오 오버뷰", icon: Headphones, gradient: "from-[#D1D5DB] to-[#E5E7EB]", enabled: false },
   { type: "video_overview", label: "동영상 개요", icon: Video, gradient: "from-[#D1D5DB] to-[#E5E7EB]", enabled: false },
