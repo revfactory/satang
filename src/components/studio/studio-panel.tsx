@@ -61,9 +61,11 @@ const OUTPUT_ICONS: Record<string, React.ReactNode> = {
 
 interface StudioPanelProps {
   notebookId: string;
+  sourceCount?: number;
 }
 
-export function StudioPanel({ notebookId }: StudioPanelProps) {
+export function StudioPanel({ notebookId, sourceCount = 0 }: StudioPanelProps) {
+  const noSources = sourceCount === 0;
   const [showInfographicModal, setShowInfographicModal] = useState(false);
   const [showSlideModal, setShowSlideModal] = useState(false);
   const [showMindMapModal, setShowMindMapModal] = useState(false);
@@ -86,6 +88,10 @@ export function StudioPanel({ notebookId }: StudioPanelProps) {
   const togglePin = useTogglePin();
 
   const handleTileClick = (type: string, enabled: boolean) => {
+    if (noSources) {
+      toast.info("소스를 먼저 추가해주세요.");
+      return;
+    }
     if (!enabled) {
       toast.info("곧 출시 예정입니다.");
       return;
@@ -140,11 +146,11 @@ export function StudioPanel({ notebookId }: StudioPanelProps) {
                 <div
                   key={tile.type}
                   className={`relative group rounded-xl ${isFullWidth ? "col-span-2" : ""} ${
-                    !tile.enabled ? "opacity-50" : ""
+                    !tile.enabled || noSources ? "opacity-50" : ""
                   }`}
                 >
                   {/* Rotating border sweep */}
-                  {tile.enabled && (
+                  {tile.enabled && !noSources && (
                     <div className="absolute inset-0 rounded-xl overflow-hidden opacity-0 group-hover:opacity-100 transition-opacity duration-400 pointer-events-none z-0">
                       <div className="absolute inset-[-50%] animate-[sweep-rotate_2.5s_linear_infinite] bg-[conic-gradient(from_0deg,transparent_0%,transparent_50%,rgba(255,255,255,0.7)_75%,transparent_95%)]" />
                     </div>
@@ -152,7 +158,7 @@ export function StudioPanel({ notebookId }: StudioPanelProps) {
                   <button
                     onClick={() => handleTileClick(tile.type, tile.enabled)}
                     className={`relative w-full bg-gradient-to-br ${tile.gradient} rounded-[11px] m-[1px] px-3 py-2.5 flex items-center gap-2 overflow-hidden transition-all duration-300 ${
-                      tile.enabled
+                      tile.enabled && !noSources
                         ? "card-glow-hover hover:shadow-lg cursor-pointer"
                         : "cursor-not-allowed"
                     }`}

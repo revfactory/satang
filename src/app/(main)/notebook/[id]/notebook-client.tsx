@@ -109,7 +109,7 @@ export function NotebookClient({ notebook, user }: NotebookClientProps) {
           <ResizableHandle withHandle />
 
           <ResizablePanel defaultSize="50%" minSize="30%">
-            <ChatPanel notebookId={notebook.id} notebookTitle={title} />
+            <ChatPanel notebookId={notebook.id} notebookTitle={title} sourceCount={sourceCount} />
           </ResizablePanel>
 
           <ResizableHandle withHandle />
@@ -120,7 +120,7 @@ export function NotebookClient({ notebook, user }: NotebookClientProps) {
             maxSize="35%"
             className="border-l border-border-default"
           >
-            <StudioPanel notebookId={notebook.id} />
+            <StudioPanel notebookId={notebook.id} sourceCount={sourceCount} />
           </ResizablePanel>
         </ResizablePanelGroup>
       </div>
@@ -129,8 +129,8 @@ export function NotebookClient({ notebook, user }: NotebookClientProps) {
       <div className="flex md:hidden flex-1 min-h-0 flex-col">
         <div className="flex-1 min-h-0 overflow-hidden">
           {mobileTab === "sources" && <SourcesPanel notebookId={notebook.id} />}
-          {mobileTab === "chat" && <ChatPanel notebookId={notebook.id} notebookTitle={title} />}
-          {mobileTab === "studio" && <StudioPanel notebookId={notebook.id} />}
+          {mobileTab === "chat" && <ChatPanel notebookId={notebook.id} notebookTitle={title} sourceCount={sourceCount} />}
+          {mobileTab === "studio" && <StudioPanel notebookId={notebook.id} sourceCount={sourceCount} />}
         </div>
         <nav className="flex border-t border-border-default bg-white shrink-0">
           {MOBILE_TABS.map((tab) => {

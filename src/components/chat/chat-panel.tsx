@@ -13,9 +13,11 @@ import { toast } from "sonner";
 interface ChatPanelProps {
   notebookId: string;
   notebookTitle: string;
+  sourceCount?: number;
 }
 
-export function ChatPanel({ notebookId, notebookTitle }: ChatPanelProps) {
+export function ChatPanel({ notebookId, notebookTitle, sourceCount = 0 }: ChatPanelProps) {
+  const disabled = sourceCount === 0;
   const [input, setInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -97,11 +99,13 @@ export function ChatPanel({ notebookId, notebookTitle }: ChatPanelProps) {
               {suggestedQuestions.map((q) => (
                 <button
                   key={q}
+                  disabled={disabled}
                   onClick={() => {
+                    if (disabled) return;
                     setInput(q);
                     textareaRef.current?.focus();
                   }}
-                  className="px-3 py-1.5 bg-gray-100 rounded-full text-[13px] text-text-secondary hover:bg-brand-light hover:text-brand transition-colors cursor-pointer"
+                  className={`px-3 py-1.5 bg-gray-100 rounded-full text-[13px] text-text-secondary transition-colors ${disabled ? "opacity-50 cursor-not-allowed" : "hover:bg-brand-light hover:text-brand cursor-pointer"}`}
                 >
                   {q}
                 </button>
@@ -208,8 +212,9 @@ export function ChatPanel({ notebookId, notebookTitle }: ChatPanelProps) {
             value={input}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
-            placeholder="입력을 시작하세요..."
-            className="w-full min-h-[44px] max-h-[200px] resize-none overflow-hidden rounded-2xl border border-border-default px-4 py-3 pr-12 text-sm text-text-primary placeholder:text-text-muted focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition-colors"
+            disabled={disabled}
+            placeholder={disabled ? "소스를 먼저 추가해주세요" : "입력을 시작하세요..."}
+            className={`w-full min-h-[44px] max-h-[200px] resize-none overflow-hidden rounded-2xl border border-border-default px-4 py-3 pr-12 text-sm text-text-primary placeholder:text-text-muted focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition-colors ${disabled ? "opacity-50 cursor-not-allowed bg-gray-50" : ""}`}
             rows={1}
           />
           {isStreaming ? (
