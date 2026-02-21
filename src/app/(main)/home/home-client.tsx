@@ -118,7 +118,7 @@ export function HomeClient({ user }: HomeClientProps) {
             {/* Quick Actions */}
             <div className="flex flex-wrap items-center gap-4">
               <button
-                onClick={handleNewNotebook}
+                onClick={() => handleNewNotebook()}
                 className="group/btn flex items-center gap-2 px-6 py-3.5 bg-brand text-white rounded-full font-semibold hover:bg-brand-hover shadow-lg shadow-brand/20 hover:shadow-brand/40 hover:-translate-y-0.5 transition-all w-full sm:w-auto justify-center"
               >
                 <BookOpen className="w-[18px] h-[18px] group-hover/btn:scale-110 transition-transform" />
@@ -163,7 +163,7 @@ export function HomeClient({ user }: HomeClientProps) {
               PDF나 문서를 업로드하고 AI의 도움을 받아 정보를 학습하고 슬라이드를 만드세요
             </p>
             <button
-              onClick={handleNewNotebook}
+              onClick={() => handleNewNotebook()}
               className="px-8 py-3.5 bg-brand text-white rounded-full text-sm font-semibold hover:bg-brand-hover shadow-lg shadow-brand/20 hover:shadow-brand/40 hover:-translate-y-1 transition-all cursor-pointer"
             >
               새 노트북 만들기
