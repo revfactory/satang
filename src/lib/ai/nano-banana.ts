@@ -322,10 +322,33 @@ export async function editSlideImage(params: {
     : "";
 
   const referenceImageInstruction = referenceImageBase64
-    ? "\nA reference image is provided. Use it as visual reference or incorporate it into the slide as instructed.\n"
+    ? `
+IMPORTANT — Two images are provided:
+1. IMAGE 1 (first image): The current slide to edit. This is the base slide you must modify.
+2. IMAGE 2 (second image): A user-provided reference image. Follow the edit instructions below to incorporate or use this image.
+
+When the user asks to "insert", "add", or "include" the image, you MUST embed IMAGE 2 directly into the slide layout while preserving the overall slide design.
+When the user asks to use it as "reference" or "style guide", adapt the slide's visual style or content based on IMAGE 2.
+`
     : "";
 
-  const prompt = `Edit this presentation slide based on the following instructions.
+  const prompt = referenceImageBase64
+    ? `Edit this presentation slide. Two images are attached: IMAGE 1 is the current slide, IMAGE 2 is a reference image provided by the user.
+
+Slide ${slideNumber} of ${totalSlides} — Topic: ${topic}
+Language: ${langName}
+
+${typePrompt}
+
+${themeInstructions}${referenceImageInstruction}
+Edit instructions: ${editPrompt}
+
+Requirements:
+- All text MUST be in ${langName}
+- 16:9 aspect ratio
+- Maintain the same visual style as the original slide
+- Apply the user's edit instructions faithfully, especially regarding IMAGE 2`
+    : `Edit this presentation slide based on the following instructions.
 Keep the overall design, layout, and theme consistent with the original.
 
 Slide ${slideNumber} of ${totalSlides} — Topic: ${topic}
@@ -333,7 +356,7 @@ Language: ${langName}
 
 ${typePrompt}
 
-${themeInstructions}${referenceImageInstruction}Edit instructions: ${editPrompt}
+${themeInstructions}Edit instructions: ${editPrompt}
 
 Requirements:
 - All text MUST be in ${langName}
