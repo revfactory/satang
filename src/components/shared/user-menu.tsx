@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LogOut, Settings, Loader2 } from "lucide-react";
+import { LogOut, Settings, ShieldCheck, Loader2 } from "lucide-react";
 
 interface UserMenuProps {
   user: {
@@ -75,6 +75,15 @@ export function UserMenu({ user }: UserMenuProps) {
           <Settings className="w-4 h-4 mr-2" />
           설정
         </DropdownMenuItem>
+        {user.role === "admin" && (
+          <DropdownMenuItem
+            onClick={() => router.push("/admin")}
+            className="cursor-pointer"
+          >
+            <ShieldCheck className="w-4 h-4 mr-2" />
+            어드민
+          </DropdownMenuItem>
+        )}
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleSignOut} disabled={isSigningOut} className="cursor-pointer">
           {isSigningOut ? (
