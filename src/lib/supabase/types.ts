@@ -9,6 +9,8 @@ export type SourceType =
   | "image"
   | "audio";
 
+export type UserRole = "user" | "admin";
+
 export type ProcessingStatus = "pending" | "processing" | "completed" | "failed";
 
 export type StudioOutputType =
@@ -33,6 +35,7 @@ export interface Database {
           email: string;
           display_name: string | null;
           avatar_url: string | null;
+          role: UserRole;
           created_at: string;
           updated_at: string;
         };
@@ -41,10 +44,12 @@ export interface Database {
           email: string;
           display_name?: string | null;
           avatar_url?: string | null;
+          role?: UserRole;
         };
         Update: {
           display_name?: string | null;
           avatar_url?: string | null;
+          role?: UserRole;
           updated_at?: string;
         };
       };
@@ -261,5 +266,6 @@ export type Notebook = Tables<"notebooks">;
 export type Source = Tables<"sources">;
 export type ChatMessage = Tables<"chat_messages">;
 export type StudioOutput = Tables<"studio_outputs">;
+export type User = Tables<"users">;
 export type Note = Tables<"notes">;
 export type DesignThemeRow = Tables<"design_themes">;

@@ -21,6 +21,7 @@ interface HomeClientProps {
     display_name: string | null;
     email: string;
     avatar_url: string | null;
+    role?: "user" | "admin";
   };
 }
 

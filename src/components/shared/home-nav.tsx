@@ -12,6 +12,7 @@ interface HomeNavProps {
     display_name: string | null;
     email: string;
     avatar_url: string | null;
+    role?: "user" | "admin";
   };
   activeTab: string;
   onTabChange: (tab: string) => void;

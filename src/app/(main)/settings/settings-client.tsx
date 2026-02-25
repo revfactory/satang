@@ -22,6 +22,7 @@ interface SettingsClientProps {
     display_name: string | null;
     email: string;
     avatar_url: string | null;
+    role?: "user" | "admin";
   };
 }
 
@@ -95,9 +96,20 @@ export function SettingsClient({ user }: SettingsClientProps) {
               </AvatarFallback>
             </Avatar>
             <div>
-              <p className="text-base font-medium text-text-primary">
-                {user.display_name}
-              </p>
+              <div className="flex items-center gap-2">
+                <p className="text-base font-medium text-text-primary">
+                  {user.display_name}
+                </p>
+                <span
+                  className={`px-2 py-0.5 text-xs font-semibold rounded-full leading-none ${
+                    user.role === "admin"
+                      ? "bg-brand-light text-brand"
+                      : "bg-gray-100 text-text-tertiary"
+                  }`}
+                >
+                  {user.role === "admin" ? "어드민" : "사용자"}
+                </span>
+              </div>
               <p className="text-sm text-text-tertiary">{user.email}</p>
             </div>
           </div>

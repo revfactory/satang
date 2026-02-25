@@ -18,6 +18,7 @@ interface UserMenuProps {
     display_name: string | null;
     email: string;
     avatar_url: string | null;
+    role?: "user" | "admin";
   };
 }
 
@@ -54,9 +55,16 @@ export function UserMenu({ user }: UserMenuProps) {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
         <div className="px-3 py-2">
-          <p className="text-sm font-medium text-text-primary">
-            {user.display_name}
-          </p>
+          <div className="flex items-center gap-1.5">
+            <p className="text-sm font-medium text-text-primary">
+              {user.display_name}
+            </p>
+            {user.role === "admin" && (
+              <span className="px-1.5 py-0.5 text-[10px] font-semibold rounded bg-brand-light text-brand leading-none">
+                어드민
+              </span>
+            )}
+          </div>
           <p className="text-xs text-text-muted">{user.email}</p>
         </div>
         <DropdownMenuSeparator />

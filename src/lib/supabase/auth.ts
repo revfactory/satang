@@ -1,4 +1,5 @@
 import { createServerSupabaseClient } from "./server";
+import type { UserRole } from "./types";
 
 export async function getUser() {
   const supabase = await createServerSupabaseClient();
@@ -23,4 +24,14 @@ export async function getUserProfile() {
     .single();
 
   return profile;
+}
+
+export async function getUserRole(): Promise<UserRole | null> {
+  const profile = await getUserProfile();
+  return profile?.role ?? null;
+}
+
+export async function isAdmin(): Promise<boolean> {
+  const role = await getUserRole();
+  return role === "admin";
 }
