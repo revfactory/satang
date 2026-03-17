@@ -44,7 +44,7 @@ export async function POST(request: Request) {
 
     const {
       notebookId, format, language, prompt, slideCount, designThemeId,
-      includeCover = true, includeBridge = true, includePageNumber = true, pageNumberPosition = "bottom-right",
+      includeCover = true, includeBridge = true, includeToc = true, includeFaq = true, includePageNumber = true, pageNumberPosition = "bottom-right",
     } = await request.json();
 
     if (!notebookId) {
@@ -77,7 +77,7 @@ export async function POST(request: Request) {
         user_id: user.id,
         type: "slide_deck",
         title: `슬라이드 - ${new Date().toLocaleDateString("ko-KR")}`,
-        settings: { format, language, prompt, slideCount, designThemeId, includeCover, includeBridge, includePageNumber, pageNumberPosition },
+        settings: { format, language, prompt, slideCount, designThemeId, includeCover, includeBridge, includeToc, includeFaq, includePageNumber, pageNumberPosition },
         generation_status: "generating",
         source_ids: sources.map((s) => s.id),
       })
@@ -136,7 +136,9 @@ export async function POST(request: Request) {
 
         const formatDescription = format === "presenter"
           ? "발표자용 (시각 중심, 텍스트 최소화, 키워드와 이미지 위주)"
-          : "상세형 (텍스트 풍부, 자세한 설명 포함)";
+          : format === "simple"
+            ? "심플형 (텍스트 없음, 순수 비주얼/이미지 위주, 제목만 최소한으로)"
+            : "상세형 (텍스트 풍부, 자세한 설명 포함)";
 
         const outlinePrompt = `다음 소스 내용을 기반으로 전문적인 프레젠테이션 슬라이드 아웃라인을 JSON으로 생성해주세요.
 
@@ -145,18 +147,19 @@ ${sourceTexts}
 
 슬라이드 수: ${slideCountRange}장
 형식: ${formatDescription}
-${prompt ? `추가 지시사항: ${prompt}` : ""}
+${format === "simple" ? `\n## 심플 비주얼 형식 규칙\n- 모든 슬라이드에서 텍스트를 최소화하세요. 제목만 짧게 포함하고 본문 텍스트는 넣지 마세요.\n- 다이어그램, 아이콘, 일러스트, 비주얼 요소로만 내용을 전달하세요.\n- content의 "content" 필드에는 시각적으로 표현할 핵심 개념만 간략히 적어주세요.\n` : ''}${prompt ? `추가 지시사항: ${prompt}` : ""}
 
 ## 프레젠테이션 구조 규칙
 
 반드시 다음 흐름을 따르세요:
 ${includeCover ? '1. 첫 번째 슬라이드는 type "cover" (표지)' : '(표지 없음 - 바로 본문으로 시작)'}
-${includeCover ? '2. 두 번째 슬라이드는 반드시 type "toc" (목차)를 포함 — 절대 생략하지 마세요' : '1. 첫 번째 슬라이드는 type "toc" (목차)'}
+${includeToc ? (includeCover ? '2. 두 번째 슬라이드는 반드시 type "toc" (목차)를 포함 — 절대 생략하지 마세요' : '1. 첫 번째 슬라이드는 type "toc" (목차)') : '- type "toc" (목차) 슬라이드는 포함하지 마세요'}
 ${includeBridge ? '- 섹션이 전환되는 지점에 type "section" (브릿지 장표)을 삽입하세요' : '- type "section" (브릿지 장표)은 사용하지 마세요'}
 - 중간 슬라이드들은 type "content" (본문)
+${includeFaq ? '- 마지막에서 두 번째 앞에 type "faq" (자주 묻는 질문) 슬라이드를 포함하세요' : ''}
 - 마지막에서 두 번째는 type "key_takeaway" (핵심 정리)
 - 마지막 슬라이드는 type "closing" (마무리)
-${includePageNumber ? `\n## 페이지 번호\n각 슬라이드에 페이지 번호를 삽입하세요. 형식: "현재페이지/총페이지" (예: 1/${slideCount || '12'}). 위치: ${pageNumberPosition === 'top-right' ? '우측 상단' : pageNumberPosition === 'bottom-center' ? '중앙 하단' : '우측 하단'}` : ''}
+${includePageNumber ? `\n## 페이지 번호\n각 슬라이드에 페이지 번호를 삽입하세요. 형식: "현재페이지/총페이지" (예: 1/${slideCount || '12'}). 위치: ${pageNumberPosition === 'top-right' ? '우측 상단' : pageNumberPosition === 'bottom-center' ? '중앙 하단' : '우측 하단'}` : '\n## 페이지 번호\n슬라이드에 페이지 번호를 절대 표시하지 마세요. 어떤 형태의 번호도 포함하지 않습니다.'}
 
 ## 디자인 테마
 
@@ -181,7 +184,7 @@ ${userThemePrompt
   ]
 }
 
-가능한 type 값: ${includeCover ? '"cover", ' : ''}"toc", ${includeBridge ? '"section", ' : ''}"content", "key_takeaway", "closing"`;
+가능한 type 값: ${includeCover ? '"cover", ' : ''}${includeToc ? '"toc", ' : ''}${includeBridge ? '"section", ' : ''}"content", ${includeFaq ? '"faq", ' : ''}"key_takeaway", "closing"`;
 
         const outlineText = await generateText(outlinePrompt);
 
@@ -221,8 +224,16 @@ ${userThemePrompt
         if (!includeBridge) {
           slides = slides.filter((s) => s.type !== "section");
         }
-        // 7장 이상인데 목차가 없으면 자동 삽입
-        if (slides.length >= 7 && !slides.some((s) => s.type === "toc")) {
+        // 목차 없는 모드에서 toc 슬라이드 제거
+        if (!includeToc) {
+          slides = slides.filter((s) => s.type !== "toc");
+        }
+        // FAQ 없는 모드에서 faq 슬라이드 제거
+        if (!includeFaq) {
+          slides = slides.filter((s) => s.type !== "faq");
+        }
+        // 7장 이상인데 목차가 없으면 자동 삽입 (includeToc가 true일 때만)
+        if (includeToc && slides.length >= 7 && !slides.some((s) => s.type === "toc")) {
           const contentSlides = slides.filter((s) => s.type === "content" || s.type === "section");
           const tocContent = contentSlides
             .map((s, i) => `${i + 1}. ${s.title}`)

@@ -39,6 +39,12 @@ const FORMATS = [
     description:
       "발표하는 동안 도움이 될 핵심 내용을 담은 간결하고 시각적인 슬라이드입니다.",
   },
+  {
+    value: "simple",
+    label: "심플 비주얼",
+    description:
+      "텍스트 없이 이미지와 시각 요소만으로 구성된 깔끔한 슬라이드입니다.",
+  },
 ];
 
 const PAGE_NUMBER_POSITIONS = [
@@ -61,6 +67,8 @@ export function SlideModal({ open, onClose, notebookId }: SlideModalProps) {
   const [prompt, setPrompt] = useState("");
   const [includeCover, setIncludeCover] = useState(true);
   const [includeBridge, setIncludeBridge] = useState(true);
+  const [includeToc, setIncludeToc] = useState(true);
+  const [includeFaq, setIncludeFaq] = useState(true);
   const [includePageNumber, setIncludePageNumber] = useState(true);
   const [pageNumberPosition, setPageNumberPosition] = useState<string>("bottom-right");
 
@@ -77,6 +85,8 @@ export function SlideModal({ open, onClose, notebookId }: SlideModalProps) {
         designThemeId: designThemeId || undefined,
         includeCover,
         includeBridge: slideCount >= 10 ? includeBridge : false,
+        includeToc,
+        includeFaq,
         includePageNumber,
         pageNumberPosition: includePageNumber ? pageNumberPosition : undefined,
       });
@@ -267,6 +277,46 @@ export function SlideModal({ open, onClose, notebookId }: SlideModalProps) {
                       className={cn(
                         "pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
                         includeBridge && slideCount >= 10 ? "translate-x-4" : "translate-x-0"
+                      )}
+                    />
+                  </button>
+                </label>
+
+                {/* TOC */}
+                <label className="flex items-center justify-between cursor-pointer group">
+                  <span className="text-[13px] font-medium text-text-secondary group-hover:text-text-primary transition-colors">목차 슬라이드</span>
+                  <button
+                    type="button"
+                    onClick={() => setIncludeToc(!includeToc)}
+                    className={cn(
+                      "relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors",
+                      includeToc ? "bg-brand" : "bg-gray-300"
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
+                        includeToc ? "translate-x-4" : "translate-x-0"
+                      )}
+                    />
+                  </button>
+                </label>
+
+                {/* FAQ */}
+                <label className="flex items-center justify-between cursor-pointer group">
+                  <span className="text-[13px] font-medium text-text-secondary group-hover:text-text-primary transition-colors">FAQ 슬라이드</span>
+                  <button
+                    type="button"
+                    onClick={() => setIncludeFaq(!includeFaq)}
+                    className={cn(
+                      "relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors",
+                      includeFaq ? "bg-brand" : "bg-gray-300"
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
+                        includeFaq ? "translate-x-4" : "translate-x-0"
                       )}
                     />
                   </button>

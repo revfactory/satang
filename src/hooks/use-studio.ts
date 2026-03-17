@@ -105,6 +105,8 @@ export function useGenerateSlides() {
       designThemeId?: string;
       includeCover?: boolean;
       includeBridge?: boolean;
+      includeToc?: boolean;
+      includeFaq?: boolean;
       includePageNumber?: boolean;
       pageNumberPosition?: string;
     }) => {

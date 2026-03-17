@@ -83,7 +83,7 @@ ${userPrompt ? `Additional style instructions: ${userPrompt}` : ""}`;
   };
 }
 
-export type SlideType = "cover" | "toc" | "section" | "content" | "key_takeaway" | "closing";
+export type SlideType = "cover" | "toc" | "section" | "content" | "key_takeaway" | "closing" | "faq";
 
 export interface DesignTheme {
   primaryColor: string;
@@ -93,6 +93,14 @@ export interface DesignTheme {
 
 const SLIDE_TYPE_PROMPTS: Record<SlideType, (params: { title: string; subtitle?: string; content: string; format: string }) => string> = {
   cover: ({ title, subtitle, format }) => {
+    if (format === "simple") {
+      return `This is the COVER slide (title slide) in SIMPLE VISUAL format.
+Layout:
+- Title "${title}" only, displayed in minimal elegant typography
+${subtitle ? `- Subtitle "${subtitle}" in very small text` : ""}
+- Full visual background — abstract art, gradient, or themed imagery
+- Absolutely NO bullet points, descriptions, or body text`;
+    }
     const base = `This is the COVER slide (title slide).
 Layout:
 - Large, bold title "${title}" centered prominently
@@ -104,6 +112,14 @@ ${subtitle ? `- Subtitle "${subtitle}" below the title in smaller text` : ""}
       : base;
   },
   toc: ({ content, format }) => {
+    if (format === "simple") {
+      return `This is a TABLE OF CONTENTS slide in SIMPLE VISUAL format.
+Layout:
+- NO text list — represent each section as an icon or numbered circle only
+- Content to represent visually: ${content}
+- Use a grid or flow layout with icons/numbers and minimal labels (1-2 words max)
+- Clean, visual-only navigation overview`;
+    }
     const base = `This is a TABLE OF CONTENTS slide.
 Layout:
 - Title "목차" or "Table of Contents" at the top
@@ -115,6 +131,13 @@ Layout:
       : base;
   },
   section: ({ title, format }) => {
+    if (format === "simple") {
+      return `This is a SECTION DIVIDER slide in SIMPLE VISUAL format.
+Layout:
+- Section name "${title}" only — minimal typography
+- Full-bleed visual background or abstract graphic representing the section topic
+- NO descriptive text, NO bullet points`;
+    }
     const base = `This is a SECTION DIVIDER slide.
 Layout:
 - Section title "${title}" displayed large and centered
@@ -125,6 +148,15 @@ Layout:
       : base;
   },
   content: ({ title, content, format }) => {
+    if (format === "simple") {
+      return `This is a CONTENT slide in SIMPLE VISUAL format.
+Layout:
+- Title "${title}" at the top in minimal text
+- DO NOT include any body text, bullet points, or paragraphs
+- Instead, represent the content PURELY through diagrams, icons, illustrations, charts, or visual metaphors
+- Concept to visualize: ${content}
+- The slide should communicate the idea through visuals alone`;
+    }
     const base = `This is a CONTENT slide.
 Layout:
 - Title "${title}" at the top
@@ -135,6 +167,15 @@ Layout:
       : `${base}\n- Include detailed explanations with clear text hierarchy\n- Use bullet points with supporting details`;
   },
   key_takeaway: ({ title, content, format }) => {
+    if (format === "simple") {
+      return `This is a KEY TAKEAWAY / SUMMARY slide in SIMPLE VISUAL format.
+Layout:
+- Title "${title}" in minimal text
+- Show each takeaway as a large icon paired with a single number or word only
+- Content to represent: ${content}
+- NO sentences or paragraphs — icons and numbers/single-words only
+- Use a clean grid or row layout`;
+    }
     const base = `This is a KEY TAKEAWAY / SUMMARY slide.
 Layout:
 - Title "${title}" at the top
@@ -146,6 +187,14 @@ Layout:
       : base;
   },
   closing: ({ title, content, format }) => {
+    if (format === "simple") {
+      return `This is the CLOSING slide in SIMPLE VISUAL format.
+Layout:
+- A single visual symbol or icon representing closure/completion (e.g., a simple "thank you" symbol)
+- "${title}" in minimal, elegant text only
+- NO body text, NO Q&A, NO QR codes
+- Full visual background matching the presentation theme`;
+    }
     const base = `This is the CLOSING slide.
 Layout:
 - "${title}" displayed prominently
@@ -154,6 +203,27 @@ Layout:
 - Do NOT include Q&A text or QR codes`;
     return format === "presenter"
       ? `${base}\n- Very minimal, focus on a memorable closing visual`
+      : base;
+  },
+  faq: ({ title, content, format }) => {
+    if (format === "simple") {
+      return `This is a FAQ slide in SIMPLE VISUAL format.
+Layout:
+- Title "${title}" in minimal text
+- Represent each Q&A pair as an icon only (e.g., question mark icon paired with a lightbulb/answer icon)
+- Content to represent: ${content}
+- NO written questions or answers — pure visual/icon representation
+- Use a clean card or grid layout with icons`;
+    }
+    const base = `This is a FAQ (Frequently Asked Questions) slide.
+Layout:
+- Title "${title}" at the top
+- Display questions and answers in a clear, organized format
+- Content: ${content}
+- Use visual separation between each Q&A pair (dividers, cards, or alternating backgrounds)
+- Questions should be bold/emphasized, answers in regular weight`;
+    return format === "presenter"
+      ? `${base}\n- Keep answers very brief (1 line each), use icons for each Q&A pair`
       : base;
   },
 };
@@ -237,7 +307,7 @@ ${themeInstructions}Global Requirements:
 - 16:9 aspect ratio, professional presentation slide
 - Clear, readable typography with good hierarchy
 - Consistent visual style across all slides in this deck
-${includePageNumber ? `- Display page number "${slideNumber}/${totalSlides}" in small text at the ${pageNumberPosition === "top-right" ? "top-right corner" : pageNumberPosition === "bottom-center" ? "bottom-center" : "bottom-right corner"} of the slide` : ""}
+${includePageNumber ? `- Display page number "${slideNumber}/${totalSlides}" in small text at the ${pageNumberPosition === "top-right" ? "top-right corner" : pageNumberPosition === "bottom-center" ? "bottom-center" : "bottom-right corner"} of the slide` : "- Do NOT display any page numbers anywhere on this slide"}
 
 ${userPrompt ? `Additional instructions: ${userPrompt}` : ""}`;
 
